@@ -3,7 +3,7 @@ from stlitepack import pack
 pack(
     app_file="streamlit_app.py",
     extra_files_to_embed=["model.py", ".streamlit/config.toml"],
-    prepend_github_path="bergam0t/nhs_oa_vidigi_streamlit",
+    prepend_github_path="hsma-programme/nhs_oa_vidigi_streamlit",
     extra_files_to_link=[
         "static/banner.png",
         "page_code_reorder_exercise.py",
