@@ -1,5 +1,7 @@
 """Exercise 4: explore viDiGi's TrialLogger plots."""
 
+from html import escape
+
 import streamlit as st
 from vidigi.logging import TrialLogger
 
@@ -177,16 +179,56 @@ with st.sidebar:
     first_seed = st.number_input('Random seed', 1, 100000, 42, key='trial_seed', help='Each run uses a consecutive seed, beginning with this one. Keep it fixed when comparing parameter changes.')
 
 with st.expander('How the TrialLogger is built'):
-    simulation_code = 'from model import Param, Model\nfrom vidigi.logging import TrialLogger\n\nparams = Param(\n'
-    simulation_code += ''.join(f'    {name}={value!r},\n' for name, value in parameters.items())
-    simulation_code += (
-        ')\ntrial_logger = TrialLogger()\n'
-        'for run_number in range(1, params.num_replications + 1):\n'
-        f'    model = Model(params, replication_id=run_number, random_seed={first_seed} + run_number - 1)\n'
-        '    model.run_model()\n'
-        '    trial_logger.add_log(model.logger)'
-    )
-    st.code(simulation_code, language='python')
+    code_column, explanation_column = st.columns([3, 2], gap='large')
+    with code_column:
+        trial_code = '''from vidigi.logging import TrialLogger
+
+class Trial:
+    def __init__(self, param):
+        self.param = param
+        self.list_of_simulation_replications = []
+        self.trial_logger = TrialLogger()
+
+    def run_trial(self):
+        for replication_id in range(self.param.num_replications):
+            model_replication = Model(self.param, replication_id)
+            model_replication.run_model()
+            patient_df = model_replication.convert_entity_list_to_dataframe(
+                model_replication.list_of_patients
+            )
+            model_replication.calculate_run_results(patient_df)
+            self.list_of_simulation_replications.append(model_replication)
+            self.trial_logger.add_log(model_replication.logger)'''
+        vidigi_lines = {
+            'from vidigi.logging import TrialLogger',
+            '        self.trial_logger = TrialLogger()',
+            '            self.trial_logger.add_log(model_replication.logger)',
+        }
+        highlighted_code = '\n'.join(
+            f'<mark style="background:#fff1a8;color:#091747;font-weight:700">{escape(line)}</mark>'
+            if line in vidigi_lines else escape(line)
+            for line in trial_code.splitlines()
+        )
+        st.html(
+            '<pre style="overflow-x:auto;padding:1rem;background:#f4f7fc;'
+            'border:1px solid #cbd5e1;border-radius:0.4rem;line-height:1.5;'
+            'font-size:0.85rem;color:#091747"><code>'
+            + highlighted_code + '</code></pre>'
+        )
+    with explanation_column:
+        st.markdown('''**What the highlighted lines add**
+
+Your `Trial` class already runs each model replication and keeps it in
+`list_of_simulation_replications` for the trial summary calculations.
+
+`TrialLogger` is a viDiGi tool for collecting the **event logs** from those
+runs. Create one logger when the `Trial` is set up. At the end of each pass
+through `run_trial()`, `add_log()` copies that replication's event log into it.
+Because the call is inside the loop, the logger contains data from every run.
+
+You can then use `trial.trial_logger` to plot queues, waiting times and resource
+use across replications. Your existing trial summary calculations still use
+`list_of_simulation_replications`.''')
 
 QUEUES = {
     'Receptionist': 'receptionist_wait_begins',
