@@ -9,6 +9,7 @@ pack(
         "page_code_reorder_exercise.py",
         "page_generate_animation.py",
         "page_generate_dfg.py",
+        "page_trial_plots.py",
         "code_preview.py",
         # Vendored streamlit-dnd (see streamlit_dnd/__init__.py for why). Linked
         # rather than pip-installed: the PyPI wheel pins streamlit>=1.58, which
