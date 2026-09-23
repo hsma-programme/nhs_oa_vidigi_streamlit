@@ -70,6 +70,17 @@ h1 {
     outline-offset: 2px;
 }
 
+/* Keep the non-drag controls available without competing with the main exercise. */
+[class*="st-key-ex1_keyboard_"] [data-testid="stExpander"] summary {
+    opacity: 0.65;
+    background-color: #f4f7fc;
+}
+
+[class*="st-key-ex1_keyboard_"] [data-testid="stExpander"] summary:hover,
+[class*="st-key-ex1_keyboard_"] [data-testid="stExpander"] summary:focus-visible {
+    opacity: 1;
+}
+
 .block-container {
     width: 100%;
     padding: 4rem 2rem 2rem;
