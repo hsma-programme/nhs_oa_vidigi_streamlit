@@ -9,8 +9,8 @@ from model import Model, Param
 
 
 @st.cache_data(max_entries=32, show_spinner=False)
-def simulation_log(parameters, replication_id):
-    model = Model(Param(**parameters), replication_id=replication_id)
+def simulation_log(parameters, random_seed):
+    model = Model(Param(**parameters), replication_id=1, random_seed=random_seed)
     model.run_model()
     return model.get_vidigi_event_log()
 
@@ -111,9 +111,9 @@ with st.sidebar:
         mean_nurse_consult_time=10,
         sd_nurse_consult_time=4,
     )
-    replication_id = st.number_input("Random seed", min_value=1, max_value=100000,
-                                     value=4, key="dfg_seed",
-                                     help="Keep the seed fixed to compare settings; change it for a new sample.")
+    random_seed = st.number_input("Random seed", min_value=1, max_value=100000,
+                                  value=4, key="dfg_seed",
+                                  help="Keep the seed fixed to compare settings; change it for a new sample.")
 
 tab_build, tab_run = st.tabs(["Build your DFG", "View the DFG"])
 with tab_build:
@@ -131,7 +131,7 @@ with tab_build:
     graph_arguments = [f"{name}={value!r}" for name, value in graph_parameters.items()]
     params_code = "from model import Param, Model\n\nwhat_if_params = Param(\n"
     params_code += "".join(f"    {name}={value!r},\n" for name, value in parameters.items())
-    params_code += f")\nmodel = Model(what_if_params, replication_id={replication_id})\nmodel.run_model()\nevent_log = model.get_vidigi_event_log()"
+    params_code += f")\nmodel = Model(what_if_params, replication_id=1, random_seed={random_seed})\nmodel.run_model()\nevent_log = model.get_vidigi_event_log()"
     occupancy_code = (
         "occupancy_stats = activity_occupancy_stats(\n"
         f"    event_log, every_x_time_units={occupancy_interval},\n"
@@ -189,7 +189,7 @@ with tab_run:
         "total number who visited a step."
     )
     with st.spinner("Building the directly-follows graph..."):
-        event_log = simulation_log(parameters, replication_id)
+        event_log = simulation_log(parameters, random_seed)
         log = add_sim_timestamp(event_log, time_unit="minutes")
         occupancy_stats = (
             occupancy_summary(event_log, occupancy_interval, parameters["sim_duration"])

@@ -20,7 +20,7 @@ def reset_parameters():
         'trial_seed': 4,
         'trial_queues': ['Receptionist', 'Nurse', 'Specialist'],
         'trial_all_runs': True,
-        'trial_shared_axis': True,
+        'trial_shared_axis': False,
         'trial_queue_interval': 5,
         'trial_queue_warmup': 0,
         'trial_duration_pair': 'Waiting for nurse',
@@ -52,8 +52,11 @@ def reset_parameters():
 @st.cache_data(max_entries=8, show_spinner=False)
 def run_trial(parameters, first_seed):
     trial = TrialLogger()
-    for run in range(parameters['num_replications']):
-        model = Model(Param(**parameters), replication_id=first_seed + run)
+    for run_number in range(1, parameters['num_replications'] + 1):
+        model = Model(
+            Param(**parameters), replication_id=run_number,
+            random_seed=first_seed + run_number - 1,
+        )
         model.run_model()
         trial.add_log(model.logger)
     return trial
@@ -177,8 +180,8 @@ with st.expander('How the TrialLogger is built'):
     simulation_code += ''.join(f'    {name}={value!r},\n' for name, value in parameters.items())
     simulation_code += (
         ')\ntrial_logger = TrialLogger()\n'
-        'for run in range(params.num_replications):\n'
-        f'    model = Model(params, replication_id={first_seed} + run)\n'
+        'for run_number in range(1, params.num_replications + 1):\n'
+        f'    model = Model(params, replication_id=run_number, random_seed={first_seed} + run_number - 1)\n'
         '    model.run_model()\n'
         '    trial_logger.add_log(model.logger)'
     )
@@ -217,7 +220,7 @@ def render_queue_tab():
         code_container = st.container(key='trial_queue_code')
         selected = st.multiselect('Queues', list(QUEUES), default=['Receptionist', 'Nurse', 'Specialist'], key='trial_queues', help='Choose which waiting queues to compare.')
         all_runs = st.checkbox('Show individual runs', True, key='trial_all_runs', help='Show individual simulation trajectories alongside the mean. Turn off to focus on the mean trajectory.')
-        shared = st.checkbox('Share queue size axis', True, key='trial_shared_axis', help='Use the same vertical scale across queue panels for easier comparison.')
+        shared = st.checkbox('Share queue size axis', False, key='trial_shared_axis', help='Use the same vertical scale across queue panels for easier comparison.')
         snapshot_column, warmup_column = st.columns(2)
         with snapshot_column:
             interval = st.slider('Snapshot interval (mins)', 1, 15, 5, key='trial_queue_interval', help='Time between queue measurements. Smaller values show more detail but take longer to calculate.')

@@ -571,7 +571,7 @@ def render_anim():
                 sd_nurse_consult_time=4,
             )
 
-            base_case_model_run = Model(base_case_params, replication_id=1)
+            base_case_model_run = Model(base_case_params, replication_id=1, random_seed=1)
             base_case_model_run.run_model()
             my_event_log = base_case_model_run.get_vidigi_event_log()
 

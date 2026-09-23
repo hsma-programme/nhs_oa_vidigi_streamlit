@@ -59,9 +59,10 @@ class Param:
 
 
 class Model:
-    def __init__(self, param, replication_id):
+    def __init__(self, param, replication_id, random_seed=1):
         self.param = param
         self.replication_id = replication_id
+        self.random_seed = random_seed
         self.env = simpy.Environment()
         self.patient_counter = 0
 
@@ -79,7 +80,7 @@ class Model:
             num_resources=self.param.num_specialists,
         )
 
-        ss = np.random.SeedSequence(self.replication_id)
+        ss = np.random.SeedSequence(self.random_seed)
         seeds = ss.spawn(5)
         self.patient_inter_dist = Exponential(
             mean=self.param.mean_patient_inter, random_seed=seeds[0]
@@ -246,8 +247,8 @@ class Model:
 #         self.trial_logger = TrialLogger()
 
 #     def run_trial(self):
-#         for replication_id in range(self.param.num_replications):
-#             model_replication = Model(self.param, replication_id)
+#         for run_number in range(1, self.param.num_replications + 1):
+#             model_replication = Model(self.param, replication_id=run_number, random_seed=run_number)
 #             model_replication.run_model()
 #             patient_df = model_replication.convert_entity_list_to_dataframe(
 #                 model_replication.list_of_patients
@@ -324,7 +325,7 @@ class Model:
 
 
 # base_case_params = Param()
-# base_case_model_run = Model(base_case_params, replication_id=1)
+# base_case_model_run = Model(base_case_params, replication_id=1, random_seed=1)
 # base_case_model_run.run_model()
 
 
