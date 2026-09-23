@@ -165,9 +165,9 @@ with st.sidebar:
     st.markdown('**Simulation parameters**')
     parameters = dict(
         mean_patient_inter=st.slider('Interarrival time (mins)', 0.1, 30.0, 2.0, step=0.1, key='trial_iat', help='Average time between arrivals. Lower values mean more patients arrive.'),
-        num_receptionists=st.slider('Number of receptionists', 1, 10, 1, key='trial_receptionists', help='Number of patients who can be registered at the same time.'),
-        num_nurses=st.slider('Number of nurses', 1, 10, 1, key='trial_nurses', help='Number of patients who can see a nurse at the same time.'),
-        num_specialists=st.slider('Number of specialists', 1, 10, 1, key='trial_specialists', help='Number of patients who can see a specialist at the same time.'),
+        num_receptionists=st.slider('Number of receptionists', 1, 15, 1, key='trial_receptionists', help='Number of patients who can be registered at the same time.'),
+        num_nurses=st.slider('Number of nurses', 1, 15, 1, key='trial_nurses', help='Number of patients who can see a nurse at the same time.'),
+        num_specialists=st.slider('Number of specialists', 1, 15, 1, key='trial_specialists', help='Number of patients who can see a specialist at the same time.'),
         specialist_prob=st.slider('Probability of needing a specialist', 0.0, 1.0, 0.3, step=0.05, key='trial_specialist_prob', help='Chance of needing a specialist after seeing a nurse. 0.3 means 30%.'),
         sim_duration=60 * st.slider('Simulation duration (hours)', 2, 24, 8, key='trial_hours', help='Total length of each run, including any warm-up selected in a plot. Longer runs allow more patients to progress through the clinic.'),
         num_replications=st.slider('Number of replications', 2, 20, 5, key='trial_replications', help='Independent runs with the same parameters and different seeds. More runs take longer to calculate.'),
