@@ -1,4 +1,4 @@
-"""Exercise 4: explore viDiGi's TrialLogger plots."""
+"""Exercise 4: explore vidigi's TrialLogger plots."""
 
 from html import escape
 
@@ -156,7 +156,6 @@ st.html('''<style>
 
 st.title('Trial plots playground')
 st.write('Explore variation across repeated simulation runs. Change the simulation settings in the sidebar, then adjust each plot using its controls. **Plots and code update automatically.**')
-st.caption('Simulation duration includes any plot warm-up. For example, an 8-hour run with a 1-hour warm-up leaves 7 hours of results to plot.')
 
 with st.sidebar:
     st.button(
@@ -171,8 +170,12 @@ with st.sidebar:
         num_nurses=st.slider('Number of nurses', 1, 15, 1, key='trial_nurses', help='Number of patients who can see a nurse at the same time.'),
         num_specialists=st.slider('Number of specialists', 1, 15, 1, key='trial_specialists', help='Number of patients who can see a specialist at the same time.'),
         specialist_prob=st.slider('Probability of needing a specialist', 0.0, 1.0, 0.3, step=0.05, key='trial_specialist_prob', help='Chance of needing a specialist after seeing a nurse. 0.3 means 30%.'),
-        sim_duration=60 * st.slider('Simulation duration (hours)', 2, 24, 8, key='trial_hours', help='Total length of each run, including any warm-up selected in a plot. Longer runs allow more patients to progress through the clinic.'),
-        num_replications=st.slider('Number of replications', 2, 20, 5, key='trial_replications', help='Independent runs with the same parameters and different seeds. More runs take longer to calculate.'),
+    )
+    simulation_hours = st.slider('Simulation duration (hours)', 2, 24, 8, key='trial_hours', help='Total length of each run, including any warm-up selected in a plot. Longer runs allow more patients to progress through the clinic.')
+    st.caption('Simulation duration includes any plot warm-up. For example, an 8-hour run with a 1-hour warm-up leaves 7 hours of results to plot.')
+    parameters.update(
+        sim_duration=60 * simulation_hours,
+        num_replications=st.slider('Number of replications', 2, 10, 5, key='trial_replications', help='Independent runs with the same parameters and different seeds. More runs take longer to calculate.'),
         mean_nurse_consult_time=10,
         sd_nurse_consult_time=4,
     )
@@ -187,6 +190,7 @@ class Trial:
     def __init__(self, param):
         self.param = param
         self.list_of_simulation_replications = []
+        ...
         self.trial_logger = TrialLogger()
 
     def run_trial(self):
@@ -198,7 +202,10 @@ class Trial:
             )
             model_replication.calculate_run_results(patient_df)
             self.list_of_simulation_replications.append(model_replication)
-            self.trial_logger.add_log(model_replication.logger)'''
+            self.trial_logger.add_log(model_replication.logger)
+
+    def calculate_trial_results(self):
+        ...'''
         vidigi_lines = {
             'from vidigi.logging import TrialLogger',
             '        self.trial_logger = TrialLogger()',
@@ -220,8 +227,10 @@ class Trial:
 
 Your `Trial` class already runs each model replication and keeps it in
 `list_of_simulation_replications` for the trial summary calculations.
+The `...` lines stand for the summary fields and calculations you have
+already seen.
 
-`TrialLogger` is a viDiGi tool for collecting the **event logs** from those
+`TrialLogger` is a vidigi tool for collecting the **event logs** from those
 runs. Create one logger when the `Trial` is set up. At the end of each pass
 through `run_trial()`, `add_log()` copies that replication's event log into it.
 Because the call is inside the loop, the logger contains data from every run.

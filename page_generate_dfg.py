@@ -1,4 +1,4 @@
-"""Exercise 3: explore viDiGi's directly-follows graphs."""
+"""Exercise 3: explore vidigi's directly-follows graphs."""
 
 import streamlit as st
 from vidigi.analysis import activity_occupancy_stats
@@ -27,6 +27,10 @@ with open("styles.css") as css:
 
 st.html("""
 <style>
+/* Clear the 5rem top navigation so the introduction stays visible. */
+.block-container {
+    padding-top: 6rem;
+}
 ::highlight(tokflash-dfg_params) {
     background-color: rgba(253, 224, 71, var(--tokflash-dfg_params, 0));
 }
@@ -41,7 +45,8 @@ intro.title("DFG Playground")
 description.write(
     "Explore a directly-follows graph (DFG): activities are nodes, and arrows "
     "connect consecutive events for each patient. Change the settings to "
-    "update the code and graph automatically."
+    "update the code and graph automatically. This exercise still uses a "
+    "single model run, so the graph shows one simulation's results."
 )
 
 with st.sidebar:
@@ -112,7 +117,7 @@ with st.sidebar:
         sd_nurse_consult_time=4,
     )
     random_seed = st.number_input("Random seed", min_value=1, max_value=100000,
-                                  value=42, key="dfg_seed",
+                                  value=4, key="dfg_seed",
                                   help="Keep the seed fixed to compare settings; change it for a new sample.")
 
 tab_build, tab_run = st.tabs(["Build your DFG", "View the DFG"])
@@ -165,16 +170,17 @@ with tab_build:
 with tab_run:
     st.write("**The graph refreshes automatically.** Change the random seed to explore another simulation sample.")
     st.info(
-        "How close is the observed transition probability on the path to the "
-        "specialist to the 'Probability of needing a specialist' you set? "
-        "Try a short 2-hour simulation, then increase the duration. Does the "
-        "observed probability move closer to your setting as more patients "
-        "pass through? Random variation means it won't necessarily get closer "
-        "on every run. Make sure 'Show transition probabilities' is enabled."
+        "**Activity: investigate the specialist branch.** Keep the random "
+        "seed fixed and set 'Probability of needing a specialist' to 0.3. "
+        "Enable 'Show transition probabilities' and run a 2-hour simulation. "
+        "Find the arrow leading to the specialist: how does its observed "
+        "probability compare with 0.3? Increase the duration to 4 hours "
+        "without changing the seed and compare again. Explain why the "
+        "observed probability can differ from the setting in a single run."
     )
     st.info(
-        "Now set the simulation duration back to the default of 4 hours and "
-        "change the random seed, keeping the other settings the same. What "
+        "Keep the simulation duration at 4 hours and change the random seed, "
+        "keeping the other settings the same. What "
         "happens to the number of patients at each step and the transition "
         "probabilities for the paths leaving that step? Try a few seeds and "
         "compare the results. Enable 'Show activity counts', 'Show transition "
@@ -196,7 +202,7 @@ with tab_run:
             if show_occupancy else None
         )
         nodes, edges = discover_dfg(log, time_unit=time_unit, occupancy_stats=occupancy_stats)
-        # viDiGi wraps labels in-place; preserve the original discovery tables.
+        # vidigi wraps labels in-place; preserve the original discovery tables.
         graph = dfg_to_graphviz(nodes.copy(), edges.copy(), **graph_parameters)
     visible_edges = edges[
         (edges["frequency"] >= min_frequency)
