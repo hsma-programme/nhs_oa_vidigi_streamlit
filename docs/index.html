@@ -208,19 +208,26 @@ class Model:
         self.random_seed = random_seed
         self.env = simpy.Environment()
         self.patient_counter = 0
+        self.logger = EventLogger(env=self.env, run_number=self.replication_id)
 
         self.receptionist = VidigiStore(
             self.env,
             num_resources=self.param.num_receptionists,
+            logger=self.logger,
+            label="receptionist",
         )
         self.nurse = VidigiStore(
             self.env,
             num_resources=self.param.num_nurses,
+            logger=self.logger,
+            label="nurse",
         )
 
         self.specialist = VidigiStore(
             self.env,
             num_resources=self.param.num_specialists,
+            logger=self.logger,
+            label="specialist",
         )
 
         ss = np.random.SeedSequence(self.random_seed)
@@ -258,8 +265,6 @@ class Model:
         self.sd_q_time_specialist = pd.NA
         self.perc_90_q_time_specialist = pd.NA
 
-        self.logger = EventLogger(env=self.env, run_number=self.replication_id)
-
     def generator_patient_arrivals(self):
         while True:
             self.patient_counter += 1
@@ -274,63 +279,45 @@ class Model:
         start_q_registration = self.env.now
         self.logger.log_queue(entity_id=patient.id, event="receptionist_wait_begins")
 
-        with self.receptionist.request() as req:
-            receptionist_obtained = yield req
+        with self.receptionist.request(
+            entity_id=patient.id,
+            start_event="being_seen_by_receptionist",
+            end_event="receptionist_visit_ends",
+        ) as req:
+            yield req
             end_q_registration = self.env.now
             patient.q_time_registration = end_q_registration - start_q_registration
-            self.logger.log_resource_use_start(
-                entity_id=patient.id,
-                event="being_seen_by_receptionist",
-                resource_id=receptionist_obtained.id_attribute,
-            )
             sampled_reg_act_time = self.registration_time_dist.sample()
             yield self.env.timeout(sampled_reg_act_time)
-            self.logger.log_resource_use_end(
-                entity_id=patient.id,
-                event="receptionist_visit_ends",
-                resource_id=receptionist_obtained.id_attribute,
-            )
 
         start_q_nurse = self.env.now
         self.logger.log_queue(entity_id=patient.id, event="nurse_wait_begins")
 
-        with self.nurse.request() as req:
-            nurse_obtained = yield req
+        with self.nurse.request(
+            entity_id=patient.id,
+            start_event="being_seen_by_nurse",
+            end_event="nurse_treatment_ends",
+        ) as req:
+            yield req
             end_q_nurse = self.env.now
             patient.q_time_nurse = end_q_nurse - start_q_nurse
-            self.logger.log_resource_use_start(
-                entity_id=patient.id,
-                event="being_seen_by_nurse",
-                resource_id=nurse_obtained.id_attribute,
-            )
             sampled_nurse_act_time = self.nurse_consult_time_dist.sample()
             yield self.env.timeout(sampled_nurse_act_time)
-            self.logger.log_resource_use_end(
-                entity_id=patient.id,
-                event="nurse_treatment_ends",
-                resource_id=nurse_obtained.id_attribute,
-            )
 
         if self.specialist_branch_prob_rng.random() < self.param.specialist_prob:
             start_q_specialist = self.env.now
             self.logger.log_queue(entity_id=patient.id, event="specialist_wait_begins")
 
-            with self.specialist.request() as req:
-                specialist_obtained = yield req
+            with self.specialist.request(
+                entity_id=patient.id,
+                start_event="being_seen_by_specialist",
+                end_event="specialist_treatment_ends",
+            ) as req:
+                yield req
                 end_q_specialist = self.env.now
                 patient.q_time_specialist = end_q_specialist - start_q_specialist
-                self.logger.log_resource_use_start(
-                    entity_id=patient.id,
-                    event="being_seen_by_specialist",
-                    resource_id=specialist_obtained.id_attribute,
-                )
                 sampled_specialist_act_time = self.specialist_time_dist.sample()
                 yield self.env.timeout(sampled_specialist_act_time)
-                self.logger.log_resource_use_end(
-                    entity_id=patient.id,
-                    event="specialist_treatment_ends",
-                    resource_id=specialist_obtained.id_attribute,
-                )
 
         self.logger.log_departure(entity_id=patient.id)
 
@@ -531,17 +518,17 @@ url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/r
 "page_code_reorder_exercise.py": {
 url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_code_reorder_exercise.py"
 },
-"code_preview.py": {
-url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/code_preview.py"
-},
-"page_trial_plots.py": {
-url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_trial_plots.py"
+"page_generate_animation.py": {
+url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_generate_animation.py"
 },
 "page_generate_dfg.py": {
 url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_generate_dfg.py"
 },
-"page_generate_animation.py": {
-url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_generate_animation.py"
+"page_trial_plots.py": {
+url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/page_trial_plots.py"
+},
+"code_preview.py": {
+url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/code_preview.py"
 },
 "streamlit_dnd/__init__.py": {
 url: "https://raw.githubusercontent.com/hsma-programme/nhs_oa_vidigi_streamlit/refs/heads/main/streamlit_dnd/__init__.py"
