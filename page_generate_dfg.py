@@ -112,7 +112,7 @@ with st.sidebar:
         sd_nurse_consult_time=4,
     )
     random_seed = st.number_input("Random seed", min_value=1, max_value=100000,
-                                  value=4, key="dfg_seed",
+                                  value=42, key="dfg_seed",
                                   help="Keep the seed fixed to compare settings; change it for a new sample.")
 
 tab_build, tab_run = st.tabs(["Build your DFG", "View the DFG"])

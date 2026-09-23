@@ -202,7 +202,7 @@ class Param:
 
 
 class Model:
-    def __init__(self, param, replication_id, random_seed=1):
+    def __init__(self, param, replication_id, random_seed=42):
         self.param = param
         self.replication_id = replication_id
         self.random_seed = random_seed
@@ -468,7 +468,7 @@ class Model:
 
 
 # base_case_params = Param()
-# base_case_model_run = Model(base_case_params, replication_id=1, random_seed=1)
+# base_case_model_run = Model(base_case_params, replication_id=1, random_seed=42)
 # base_case_model_run.run_model()
 
 

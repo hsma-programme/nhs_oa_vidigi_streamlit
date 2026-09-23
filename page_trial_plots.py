@@ -17,7 +17,7 @@ def reset_parameters():
         'trial_specialist_prob': 0.3,
         'trial_hours': 8,
         'trial_replications': 5,
-        'trial_seed': 4,
+        'trial_seed': 42,
         'trial_queues': ['Receptionist', 'Nurse', 'Specialist'],
         'trial_all_runs': True,
         'trial_shared_axis': False,
@@ -154,6 +154,7 @@ st.html('''<style>
 
 st.title('Trial plots playground')
 st.write('Explore variation across repeated simulation runs. Change the simulation settings in the sidebar, then adjust each plot using its controls. **Plots and code update automatically.**')
+st.caption('Simulation duration includes any plot warm-up. For example, an 8-hour run with a 1-hour warm-up leaves 7 hours of results to plot.')
 
 with st.sidebar:
     st.button(
@@ -168,12 +169,12 @@ with st.sidebar:
         num_nurses=st.slider('Number of nurses', 1, 10, 1, key='trial_nurses', help='Number of patients who can see a nurse at the same time.'),
         num_specialists=st.slider('Number of specialists', 1, 10, 1, key='trial_specialists', help='Number of patients who can see a specialist at the same time.'),
         specialist_prob=st.slider('Probability of needing a specialist', 0.0, 1.0, 0.3, step=0.05, key='trial_specialist_prob', help='Chance of needing a specialist after seeing a nurse. 0.3 means 30%.'),
-        sim_duration=60 * st.slider('Simulation duration (hours)', 2, 24, 8, key='trial_hours', help='Length of each run. Longer runs allow more patients to progress through the clinic.'),
+        sim_duration=60 * st.slider('Simulation duration (hours)', 2, 24, 8, key='trial_hours', help='Total length of each run, including any warm-up selected in a plot. Longer runs allow more patients to progress through the clinic.'),
         num_replications=st.slider('Number of replications', 2, 20, 5, key='trial_replications', help='Independent runs with the same parameters and different seeds. More runs take longer to calculate.'),
         mean_nurse_consult_time=10,
         sd_nurse_consult_time=4,
     )
-    first_seed = st.number_input('Starting random seed', 1, 100000, 4, key='trial_seed', help='Runs use consecutive seeds starting here. Keep this fixed when comparing parameter changes.')
+    first_seed = st.number_input('Random seed', 1, 100000, 42, key='trial_seed', help='Each run uses a consecutive seed, beginning with this one. Keep it fixed when comparing parameter changes.')
 
 with st.expander('How the TrialLogger is built'):
     simulation_code = 'from model import Param, Model\nfrom vidigi.logging import TrialLogger\n\nparams = Param(\n'
@@ -210,10 +211,12 @@ def render_queue_tab():
         'simulation, how many receptionists, nurses and specialists do you need '
         'to keep the mean queue below 5 patients at every plotted time point '
         'for all three steps? Turn off "Show individual runs" to focus on the '
-        'mean across replications. Keep the other simulation settings fixed and '
+        'mean across replications. "Share queue size axis" is off by default, '
+        'so read each panel\'s own vertical scale when checking the target. '
+        'Keep the other simulation settings fixed and '
         'warm-up at 0, then adjust each resource count. Does reducing one queue '
         'put more pressure on the next step? Finally, try more replications or '
-        'a different starting seed to see whether your choice still meets the target.'
+        'a different random seed to see whether your choice still meets the target.'
     )
     controls, output = st.columns([0.38, 0.62])
     with controls:
@@ -243,6 +246,14 @@ def render_queue_tab():
 
 @st.fragment
 def render_duration_tab():
+    st.info(
+        '**Activity: investigate waiting times.** Start with "Waiting for nurse" '
+        'and compare the median, spread and long waits across runs. Keep the '
+        'random seed fixed while increasing the number of nurses in the '
+        'sidebar. How do the distribution and its outliers change? Try the '
+        'violin plot to see where waits are concentrated, then increase the '
+        'number of replications. Do the runs tell a consistent story?'
+    )
     controls, output = st.columns([0.38, 0.62])
     with controls:
         code_container = st.container(key='trial_duration_code')
@@ -290,6 +301,14 @@ def render_duration_tab():
 
 @st.fragment
 def render_resource_tab():
+    st.info(
+        '**Activity: find the busiest resource.** With "Utilisation" selected, '
+        'compare the steps and their results across runs. Which resource is '
+        'busy for the largest share of its available time? Increase its '
+        'capacity by one in the sidebar and see how utilisation changes. '
+        'Check the queue size tab too: did the extra capacity reduce that '
+        'step\'s queue, or shift the pressure to another step?'
+    )
     controls, output = st.columns([0.38, 0.62])
     with controls:
         code_container = st.container(key='trial_resource_code')
@@ -321,6 +340,14 @@ def render_resource_tab():
 
 @st.fragment
 def render_resource_time_tab():
+    st.info(
+        '**Activity: spot periods of pressure.** Turn off "Show individual '
+        'runs" and use "Show proportion of capacity" to compare the mean '
+        'resource use over time. When is each step closest to full capacity? '
+        'Increase the number of resources at the busiest step, keeping the '
+        'random seed fixed. Does the peak fall, and does another step become '
+        'the busiest? Turn individual runs back on to see how much they vary.'
+    )
     controls, output = st.columns([0.38, 0.62])
     with controls:
         code_container = st.container(key='trial_resource_time_code')
@@ -351,6 +378,14 @@ def render_resource_time_tab():
 
 @st.fragment
 def render_arrival_tab():
+    st.info(
+        '**Activity: see whether arrival time affects waiting.** Select '
+        '"Waiting for nurse" and add a trend line using a window of 10 '
+        'patients. Do patients arriving later tend to wait longer? Keep the '
+        'random seed fixed and increase the number of nurses. Compare the '
+        'points and trend line before and after, then colour by run to see '
+        'whether the pattern holds across replications.'
+    )
     controls, output = st.columns([0.38, 0.62])
     with controls:
         code_container = st.container(key='trial_arrival_code')

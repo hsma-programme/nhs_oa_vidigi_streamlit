@@ -201,6 +201,23 @@ with st.sidebar:
         max_value=10,
         key="num_specialists_input",
     )
+    sim_duration_hours = st.slider(
+        "Simulation duration (hours)",
+        min_value=2,
+        max_value=12,
+        value=2,
+        key="animation_duration_hours",
+        help="Total time simulated, including any animation warm-up period.",
+    )
+    warm_up_minutes = st.slider(
+        "Animation warm-up (mins)",
+        min_value=0,
+        max_value=sim_duration_hours * 60 - 30,
+        value=0,
+        step=30,
+        key="animation_warm_up",
+        help="Hide the start of the run so queues can build before the animation begins. This time is included in the simulation duration.",
+    )
 
 
 tab_build, tab_run = st.tabs(["Build your animation", "Run the animation"])
@@ -209,6 +226,12 @@ with tab_build:
     st.write("""
 Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
+    st.info(
+        "Try adding a warm-up period and increasing the simulation duration. "
+        "For example, run for 4 hours with a 60-minute warm-up, then compare "
+        "the animation with the default settings. The simulation duration "
+        "includes the warm-up, so this leaves 3 hours to view."
+    )
 
     advanced = st.container(key="advanced_section")
     with advanced.expander(
@@ -429,6 +452,7 @@ what_if_params = Param(
     num_receptionists={num_recep_slider},
     num_specialists={num_specialists_slider},
     mean_patient_inter={iat_slider},
+    sim_duration={sim_duration_hours * 60},
     mean_nurse_consult_time=10,
     sd_nurse_consult_time=4,
 )
@@ -446,6 +470,7 @@ class Animation:
             event_log=self.event_log, scenario=self.params,
             event_position_df=self.layout, plotly_height=500,
             every_x_time_units={time_interval_slider},
+            warm_up={warm_up_minutes},
             entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
              wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
             gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
@@ -533,6 +558,7 @@ class Animation:
             event_log=self.event_log,
             event_position_df=self.layout,
             every_x_time_units=time_interval,
+            warm_up=warm_up_minutes,
             scenario=self.params,
             gap_between_entities=gap_between_entities_slider,
             step_snapshot_max=maximum_queue,
@@ -567,17 +593,18 @@ def render_anim():
                 num_receptionists=num_recep_slider,
                 num_specialists=num_specialists_slider,
                 mean_patient_inter=iat_slider,
+                sim_duration=sim_duration_hours * 60,
                 mean_nurse_consult_time=10,
                 sd_nurse_consult_time=4,
             )
 
-            base_case_model_run = Model(base_case_params, replication_id=1, random_seed=1)
+            base_case_model_run = Model(base_case_params, replication_id=1, random_seed=42)
             base_case_model_run.run_model()
             my_event_log = base_case_model_run.get_vidigi_event_log()
 
             my_animation = Animation(my_event_log, base_case_params)
 
-            fig = my_animation.build_animation()
+            fig = my_animation.build_animation(time_interval=time_interval_slider)
 
         st.plotly_chart(fig)
 
