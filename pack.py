@@ -30,7 +30,7 @@ pack(
         # 6.0.1 ("Metadata-Version: 2.2") has only bundled deps (narwhals,
         # packaging) in Pyodide 0.29.3.
         "plotly==6.0.1",
-        "vidigi>=1.3.1,<2.0.0",
+        "vidigi>=2.0.0,<3.0.0",
         "simpy",
         "sim-tools",
     ],
