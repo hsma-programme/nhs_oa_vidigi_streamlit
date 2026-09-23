@@ -7,15 +7,21 @@ from model import Model, Param
 
 
 class ExerciseTests(unittest.TestCase):
+    @staticmethod
+    def tick_count(app):
+        return sum(item.value == '✅' for item in app.markdown)
+
     def test_each_setup_answer_can_be_checked_independently(self):
         app = AppTest.from_file('../streamlit_app.py', default_timeout=20).run()
         self.assertFalse(app.exception)
+        self.assertEqual(self.tick_count(app), 0)
         self.assertFalse(any(button.key == 'ex1_check_order' for button in app.button))
         app.button(key='ex1_check_class').click().run()
         self.assertTrue(app.warning)
-        app.selectbox(key='ex1_class').select('simpy.Resource')
+        app.selectbox(key='ex1_class').select('simpy.Store')
         app.button(key='ex1_check_class').click().run()
-        self.assertIn('individual nurse', app.warning[0].value)
+        self.assertIn('simpy.Store', app.warning[0].value)
+        self.assertIn('log their use automatically', app.warning[0].value)
         self.assertNotIn('VidigiStore', app.warning[0].value)
         app.selectbox(key='ex1_class').select('VidigiResource')
         app.button(key='ex1_check_class').click().run()
@@ -24,6 +30,7 @@ class ExerciseTests(unittest.TestCase):
         app.selectbox(key='ex1_class').select('VidigiStore')
         app.button(key='ex1_check_class').click().run()
         self.assertTrue(app.success)
+        self.assertEqual(self.tick_count(app), 1)
         app.multiselect(key='ex1_imports').set_value([
             'from vidigi.logging import EventLogger',
             'from vidigi.resources import VidigiStore',
@@ -31,15 +38,19 @@ class ExerciseTests(unittest.TestCase):
         app.selectbox(key='ex1_count').select('num_resources')
         app.selectbox(key='ex1_logger').select('self.logger')
         app.run()
+        self.assertEqual(self.tick_count(app), 1)
         self.assertFalse(any(button.key == 'ex1_check_order' for button in app.button))
         for key in ('imports', 'count', 'logger'):
             app.button(key='ex1_check_' + key).click().run()
             self.assertTrue(app.success)
         self.assertTrue(any(button.key == 'ex1_check_order' for button in app.button))
+        self.assertEqual(self.tick_count(app), 4)
         app.selectbox(key='ex1_count').select('capacity').run()
         self.assertFalse(any(button.key == 'ex1_check_order' for button in app.button))
+        self.assertEqual(self.tick_count(app), 3)
         app.selectbox(key='ex1_count').select('num_resources').run()
         self.assertTrue(any(button.key == 'ex1_check_order' for button in app.button))
+        self.assertEqual(self.tick_count(app), 4)
         self.assertFalse(app.exception)
         app.button(key='ex1_check_order').click().run()
         self.assertTrue(app.warning)
@@ -60,11 +71,14 @@ class ExerciseTests(unittest.TestCase):
         for key in ('entity', 'start', 'end'):
             app.button(key='ex1_check_' + key).click().run()
             self.assertTrue(app.success)
+        self.assertEqual(self.tick_count(app), 3)
         self.assertTrue(any(button.key == 'ex1_check_path' for button in app.button))
         app.selectbox(key='ex1_entity').select('self.replication_id').run()
         self.assertFalse(any(button.key == 'ex1_check_path' for button in app.button))
+        self.assertEqual(self.tick_count(app), 2)
         app.selectbox(key='ex1_entity').select('patient.id').run()
         self.assertTrue(any(button.key == 'ex1_check_path' for button in app.button))
+        self.assertEqual(self.tick_count(app), 3)
         names = ['ex1_path_0', 'ex1_path_1']
         lists = {name: list(app.session_state[name]) for name in names}
         ordered_starter = ['startq', 'old', 'yield', 'endq', 'sample', 'timeout']

@@ -109,8 +109,9 @@ col1_intro.title("Animation Playground")
 
 with col2_intro:
     st.write("")
+    st.write("")
     st.write(
-        "This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation."
+        "**This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation.**"
     )
 
 with st.sidebar:
@@ -131,7 +132,7 @@ with st.sidebar:
     )
     gap_between_queue_rows_slider = st.slider(
         "Gap between queue rows",
-        value=40,
+        value=50,
         min_value=1,
         max_value=100,
         key="gap_between_queue_rows_input",
@@ -226,12 +227,6 @@ with tab_build:
     st.write("""
 Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
-    st.info(
-        "Try adding a warm-up period and increasing the simulation duration. "
-        "For example, run for 4 hours with a 60-minute warm-up, then compare "
-        "the animation with the default settings. The simulation duration "
-        "includes the warm-up, so this leaves 3 hours to view."
-    )
 
     advanced = st.container(key="advanced_section")
     with advanced.expander(
@@ -456,42 +451,93 @@ what_if_params = Param(
     mean_nurse_consult_time=10,
     sd_nurse_consult_time=4,
 )
+
+what_if_model = Model(base_case_params, replication_id=1)
+what_if_model.run_model()
+"""
+
+    event_position_code = f"""
+layout = create_event_position_df(
+    [
+        EventPosition(
+            event="arrival",
+            label="{arrival_label}",
+            x={arrival_x}, y={arrival_y},
+        ),
+        EventPosition(
+            event="receptionist_wait_begins",
+            label="{receptionist_wait_label}",
+            x={receptionist_wait_x}, y={receptionist_wait_y},
+        ),
+        EventPosition(
+            event="being_seen_by_receptionist",
+            label="{receptionist_seen_label}",
+            x={receptionist_seen_x}, y={receptionist_seen_y},
+            resource="num_receptionists",
+        ),
+        EventPosition(
+            event="nurse_wait_begins",
+            label="{nurse_wait_label}",
+            x={nurse_wait_x}, y={nurse_wait_y},
+
+        ),
+        EventPosition(
+            event="being_seen_by_nurse",
+            label="{nurse_seen_label}",
+            x={nurse_seen_x}, y={nurse_seen_y},
+            resource="num_nurses",
+        ),
+        EventPosition(
+            event="specialist_wait_begins",
+            label="{specialist_wait_label}",
+            x={specialist_wait_x}, y={specialist_wait_y},
+
+        ),
+        EventPosition(
+            event="being_seen_by_specialist",
+            label="{specialist_seen_label}",
+            x={specialist_seen_x}, y={specialist_seen_y},
+            resource="num_specialists",
+        ),
+        EventPosition(
+            event="depart", x={depart_x}, y={depart_y}, label="{depart_label}"
+        ),
+    ]
+)
 """
 
     anim_code = f"""
-class Animation:
-    def __init__(self, event_log, params):
-        self.event_log = event_log
-        self.params = params
-        self.layout = create_event_position_df(...)
-
-    def build_animation(self):
-        animate_activity_log(
-            event_log=self.event_log, scenario=self.params,
-            event_position_df=self.layout, plotly_height=500,
-            every_x_time_units={time_interval_slider},
-            warm_up={warm_up_minutes},
-            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
-             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
-            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
-        )
+what_if_model.logger.animate_activity_log(
+    event_log=self.event_log, scenario=self.params,
+    event_position_df=self.layout, plotly_height=600,
+    every_x_time_units={time_interval_slider},
+    warm_up={warm_up_minutes},
+    entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
+    wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
+    gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
+)
 """
 
     # Strip the leading/trailing newline so the rendered text (and therefore
     # the highlight offsets) line up exactly with these strings.
     params_code = params_code.strip("\n")
     anim_code = anim_code.strip("\n")
+    event_position_code = event_position_code.strip("\n")
 
-    col_params, col_anim = st.columns([0.35, 0.65])
+    col_params, col_layout, col_anim = st.columns([0.3, 0.35, 0.35])
 
     with col_params, st.container(key="code_params"):
         st.code(params_code)
+
+    with col_layout, st.container(key="code_layout"):
+        st.code(event_position_code)
 
     with col_anim, st.container(key="code_anim"):
         st.code(anim_code)
 
     # Flash each block when its slider-driven code actually changes.
     flash_on_change("code_params", params_code)
+    flash_on_change("code_layout", event_position_code)
     flash_on_change("code_anim", anim_code)
 
 
@@ -563,7 +609,7 @@ class Animation:
             gap_between_entities=gap_between_entities_slider,
             step_snapshot_max=maximum_queue,
             gap_between_resources=gap_between_resources_slider,
-            plotly_height=500,
+            plotly_height=600,
             entity_icon_size=entity_icon_size_slider,
             gap_between_queue_rows=gap_between_queue_rows_slider,
             wrap_queues_at=wrap_queues_at,
@@ -598,7 +644,9 @@ def render_anim():
                 sd_nurse_consult_time=4,
             )
 
-            base_case_model_run = Model(base_case_params, replication_id=1, random_seed=42)
+            base_case_model_run = Model(
+                base_case_params, replication_id=1, random_seed=42
+            )
             base_case_model_run.run_model()
             my_event_log = base_case_model_run.get_vidigi_event_log()
 
