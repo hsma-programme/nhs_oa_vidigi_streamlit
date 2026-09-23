@@ -64,6 +64,7 @@ pg = st.navigation(
     [
         st.Page("page_code_reorder_exercise.py", title="Exercise 1"),
         st.Page("page_generate_animation.py", title="Exercise 2"),
+        st.Page("page_generate_dfg.py", title="Exercise 3"),
     ],
     position="top",
 )

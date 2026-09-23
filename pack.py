@@ -8,6 +8,8 @@ pack(
         "static/banner.png",
         "page_code_reorder_exercise.py",
         "page_generate_animation.py",
+        "page_generate_dfg.py",
+        "code_preview.py",
         # Vendored streamlit-dnd (see streamlit_dnd/__init__.py for why). Linked
         # rather than pip-installed: the PyPI wheel pins streamlit>=1.58, which
         # micropip refuses under stlite (bundled Streamlit is 1.57.0). These
@@ -28,7 +30,7 @@ pack(
         # 6.0.1 ("Metadata-Version: 2.2") has only bundled deps (narwhals,
         # packaging) in Pyodide 0.29.3.
         "plotly==6.0.1",
-        "vidigi",
+        "vidigi>=1.3.1,<2.0.0",
         "simpy",
         "sim-tools",
     ],
