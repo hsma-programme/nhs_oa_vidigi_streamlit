@@ -2,7 +2,6 @@
 
 import random
 
-import pandas as pd
 import streamlit as st
 from streamlit_dnd import apply_move, dnd
 
@@ -406,23 +405,14 @@ with log_tab:
     st.write(
         "Patient 7 arrives at minute 2 and immediately joins the nurse queue. The nurse becomes available at minute 5. Treatment lasts 4 minutes, then the patient leaves. The model runs beyond minute 9."
     )
-    events = [
-        "arrival",
-        "nurse_wait_begins",
-        "being_seen_by_nurse",
-        "nurse_treatment_ends",
-        "depart",
-    ]
-    st.dataframe(
-        pd.DataFrame(
-            {
-                "entity_id": [7] * 5,
-                "event": events,
-                "time": [2, 2, 5, 9, 9],
-                "resource_id": [None, None, 1, 1, None],
-            }
-        ),
-        hide_index=True,
+    st.markdown(
+        """| entity_id | event | time | resource_id |
+| --- | --- | ---: | ---: |
+| 7 | arrival | 2 | — |
+| 7 | nurse_wait_begins | 2 | — |
+| 7 | being_seen_by_nurse | 5 | 1 |
+| 7 | nurse_treatment_ends | 9 | 1 |
+| 7 | depart | 9 | — |"""
     )
     st.caption(
         "Illustrative excerpt assuming this nurse has resource ID 1. Waiting lasts 3 minutes; treatment lasts 4."

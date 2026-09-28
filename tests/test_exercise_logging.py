@@ -102,7 +102,9 @@ class ExerciseTests(unittest.TestCase):
     def test_log_bridge_predicts_snapshot_positions(self):
         app = AppTest.from_file('../streamlit_app.py', default_timeout=20).run()
         self.assertFalse(app.exception)
-        self.assertEqual(len(app.dataframe), 1)
+        log_tables = [item.value for item in app.markdown if '| 7 | arrival | 2 | — |' in item.value]
+        self.assertEqual(len(log_tables), 1)
+        self.assertIn('| 7 | depart | 9 | — |', log_tables[0])
         app.button(key='ex1_check_log').click().run()
         self.assertTrue(app.warning)
         app.selectbox(key='ex1_snapshot_time').select(4)
