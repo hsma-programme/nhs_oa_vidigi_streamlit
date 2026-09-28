@@ -44,6 +44,8 @@ class ExerciseTests(unittest.TestCase):
             app.button(key='ex1_check_' + key).click().run()
             self.assertTrue(app.success)
         self.assertTrue(any(button.key == 'ex1_check_order' for button in app.button))
+        self.assertFalse(any(button.key in {'ex1_check_setup', 'ex1_reset_setup'}
+                             for button in app.button))
         self.assertEqual(self.tick_count(app), 4)
         app.selectbox(key='ex1_count').select('capacity').run()
         self.assertFalse(any(button.key == 'ex1_check_order' for button in app.button))
@@ -62,23 +64,9 @@ class ExerciseTests(unittest.TestCase):
     def test_pathway_feedback_and_reversible_moves(self):
         app = AppTest.from_file('../streamlit_app.py', default_timeout=20).run()
         self.assertFalse(app.exception)
-        self.assertFalse(any(button.key == 'ex1_check_path' for button in app.button))
-        for key, value in [('entity', 'patient.id'), ('start', 'being_seen_by_nurse'),
-                           ('end', 'nurse_treatment_ends')]:
-            app.selectbox(key='ex1_' + key).select(value)
-        app.run()
-        self.assertFalse(any(button.key == 'ex1_check_path' for button in app.button))
-        for key in ('entity', 'start', 'end'):
-            app.button(key='ex1_check_' + key).click().run()
-            self.assertTrue(app.success)
-        self.assertEqual(self.tick_count(app), 3)
         self.assertTrue(any(button.key == 'ex1_check_path' for button in app.button))
-        app.selectbox(key='ex1_entity').select('self.replication_id').run()
-        self.assertFalse(any(button.key == 'ex1_check_path' for button in app.button))
-        self.assertEqual(self.tick_count(app), 2)
-        app.selectbox(key='ex1_entity').select('patient.id').run()
-        self.assertTrue(any(button.key == 'ex1_check_path' for button in app.button))
-        self.assertEqual(self.tick_count(app), 3)
+        self.assertFalse(any(widget.key in {'ex1_entity', 'ex1_start', 'ex1_end'}
+                             for widget in app.selectbox))
         names = ['ex1_path_0', 'ex1_path_1']
         lists = {name: list(app.session_state[name]) for name in names}
         ordered_starter = ['startq', 'old', 'yield', 'endq', 'sample', 'timeout']

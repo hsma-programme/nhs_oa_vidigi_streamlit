@@ -83,6 +83,7 @@ def board(
     fixed_header=None,
     descriptions=None,
     show_headings=True,
+    show_reset=True,
 ):
     """Persistent, reversible drag moves, with a keyboard-friendly alternative."""
     keys = [f"ex1_{prefix}_{i}" for i in range(len(initial))]
@@ -119,7 +120,7 @@ def board(
     if event:
         apply_move(event, lists)
         st.rerun()
-    if st.button("Reset this board", key=f"ex1_reset_{prefix}"):
+    if show_reset and st.button("Reset this board", key=f"ex1_reset_{prefix}"):
         for key in keys:
             del st.session_state[key]
         # Retain component event IDs so a previous drag is not replayed.
@@ -233,40 +234,15 @@ with setup_tab:
             ["Setup order"],
             fixed_header="class Model:\n    def __init__(self, param):\n        self.param = param",
             show_headings=False,
+            show_reset=False,
         )
-        if st.button("Check order", key="ex1_check_order"):
+        if st.button("Check order", key="ex1_check_order", type="primary"):
             feedback(
                 [
                     (
                         setup_order == ["env", "logger", "store"],
                         "The logger needs an existing environment, and the store needs an existing logger. Check those dependencies.",
                     )
-                ]
-            )
-        if st.button("Check setup", key="ex1_check_setup", type="primary"):
-            feedback(
-                [
-                    (
-                        set(imports)
-                        == {
-                            "from vidigi.logging import EventLogger",
-                            "from vidigi.resources import VidigiStore",
-                        },
-                        "Choose the logger for a single run and the store that manages individual resources. VidigiResource represents an individual resource internally.",
-                    ),
-                    (cls == "VidigiStore", resource_class_hint(cls)),
-                    (
-                        count == "num_resources",
-                        "VidigiStore uses a different argument for the initial number of resources than simpy.Resource.",
-                    ),
-                    (
-                        logger == "self.logger",
-                        "Pass the logger instance you created, rather than its class or the simulation environment.",
-                    ),
-                    (
-                        setup_order == ["env", "logger", "store"],
-                        "The logger needs an existing environment, and the store needs an existing logger. Check those dependencies.",
-                    ),
                 ]
             )
         with st.expander("Show a worked setup answer"):
@@ -278,204 +254,153 @@ with setup_tab:
             )
 
 with pathway_tab:
+    st.subheader("Keep, replace and insert")
     st.write(
-        "First, choose the patient ID and the two event names for the replacement nurse request. Check each answer to unlock the code exercise."
+        "Assume the nurse store is connected to the logger. The `def attend_clinic` line is fixed at the top of the patient pathway. Reorder the existing code, replace the original nurse request, and weave in the logging statements. Drag any lines you no longer need back to Available snippets. Indentation is supplied on each card."
     )
-    entity = checked_question(
-        lambda: choice(
-            "entity_id: which value identifies this patient?",
-            ["self.replication_id", "patient.id", "self.param.num_nurses"],
-            "entity",
-        ),
-        lambda answer: answer == "patient.id",
-        "Resource logging needs this patient's ID, not a replication ID or a resource count.",
-        "entity",
-        remember_success=True,
-    )
-    start = checked_question(
-        lambda: choice(
-            "start_event: what should we call the start of nurse treatment?",
-            ["nurse_wait_begins", "being_seen_by_nurse", "nurse_treatment_ends"],
-            "start",
-        ),
-        lambda answer: answer == "being_seen_by_nurse",
-        "The start event marks treatment after the patient obtains a nurse. Waiting begins before that.",
-        "start",
-        remember_success=True,
-    )
-    end = checked_question(
-        lambda: choice(
-            "end_event: what should we call the end of nurse treatment?",
-            ["depart", "nurse_treatment_ends", "being_seen_by_nurse"],
-            "end",
-        ),
-        lambda answer: answer == "nurse_treatment_ends",
-        "The end event marks release of the nurse. Departure is logged separately after treatment.",
-        "end",
-        remember_success=True,
-    )
-    request_ready = all(
-        answer is not None and st.session_state.get(f"ex1_verified_{key}") == answer
-        for key, answer in (("entity", entity), ("start", start), ("end", end))
-    )
-    if not request_ready:
-        st.info("Check all three answers correctly to reveal the code exercise.")
-    else:
-        st.subheader("Keep, replace and insert")
-        st.write(
-            "Assume the nurse store is connected to the logger. The `def attend_clinic` line is fixed at the top of the patient pathway. Reorder the existing code, replace the original nurse request, and weave in the logging statements. Drag any lines you no longer need back to Available snippets. Indentation is supplied on each card."
-        )
-        snippets = {
-            "startq": "    start_q_nurse = self.env.now",
-            "old": "    with self.nurse.request() as req:",
-            "request": f"    with self.nurse.request(\n        entity_id={entity or 'ENTITY_ID'},\n        start_event={start or 'START_EVENT'!r},\n        end_event={end or 'END_EVENT'!r},\n    ) as req:",
-            "yield": "        yield req",
-            "endq": "        end_q_nurse = self.env.now\n        patient.q_time_nurse = end_q_nurse - start_q_nurse",
-            "sample": "        sampled_nurse_act_time = self.nurse_consult_time_dist.sample()",
-            "timeout": "        yield self.env.timeout(sampled_nurse_act_time)",
-            "arrival": "    self.logger.log_arrival(entity_id=patient.id)",
-            "queue": '    self.logger.log_queue(entity_id=patient.id, event="nurse_wait_begins")',
-            "departure": "    self.logger.log_departure(entity_id=patient.id)",
-            "placeholder": '        self.logger.log_queue(entity_id=patient.id, event="being_seen_by_nurse")',
-            "manual": '        self.logger.log_resource_use_start(\n            entity_id=patient.id,\n            event="being_seen_by_nurse",\n            resource_id=nurse_obtained.id_attribute,\n        )',
-        }
-        available = [
-            "arrival",
-            "request",
-            "queue",
-            "departure",
-            "placeholder",
-            "manual",
-        ]
-        random.Random(17).shuffle(available)
-        ordered_starter = ["startq", "old", "yield", "endq", "sample", "timeout"]
-        if "ex1_path_starter_shuffled" not in st.session_state:
-            # Refresh an untouched board in sessions opened before this change.
-            if (
-                st.session_state.get("ex1_path_0") == ordered_starter
-                and len(st.session_state.get("ex1_path_1", [])) == len(available)
-                and set(st.session_state["ex1_path_1"]) == set(available)
-            ):
-                st.session_state["ex1_path_0"] = shuffled_starter(ordered_starter)
-            st.session_state["ex1_path_starter_shuffled"] = True
-        # Preserve learners' discarded snippets when an open session moves from
-        # the former three-column board to this two-column version.
-        if "ex1_path_2" in st.session_state:
-            discarded = st.session_state.pop("ex1_path_2")
-            st.session_state.setdefault(
-                "ex1_path_1",
-                [
-                    item
-                    for item in available
-                    if item not in st.session_state.get("ex1_path_0", [])
-                ],
-            )
-            st.session_state["ex1_path_1"].extend(
+    snippets = {
+        "startq": "    start_q_nurse = self.env.now",
+        "old": "    with self.nurse.request() as req:",
+        "request": '    with self.nurse.request(\n        entity_id=patient.id,\n        start_event="being_seen_by_nurse",\n        end_event="nurse_treatment_ends",\n    ) as req:',
+        "yield": "        yield req",
+        "endq": "        end_q_nurse = self.env.now\n        patient.q_time_nurse = end_q_nurse - start_q_nurse",
+        "sample": "        sampled_nurse_act_time = self.nurse_consult_time_dist.sample()",
+        "timeout": "        yield self.env.timeout(sampled_nurse_act_time)",
+        "arrival": "    self.logger.log_arrival(entity_id=patient.id)",
+        "queue": '    self.logger.log_queue(entity_id=patient.id, event="nurse_wait_begins")',
+        "departure": "    self.logger.log_departure(entity_id=patient.id)",
+        "placeholder": '        self.logger.log_queue(entity_id=patient.id, event="being_seen_by_nurse")',
+        "manual": '        self.logger.log_resource_use_start(\n            entity_id=patient.id,\n            event="being_seen_by_nurse",\n            resource_id=nurse_obtained.id_attribute,\n        )',
+    }
+    available = [
+        "arrival",
+        "request",
+        "queue",
+        "departure",
+        "placeholder",
+        "manual",
+    ]
+    random.Random(17).shuffle(available)
+    ordered_starter = ["startq", "old", "yield", "endq", "sample", "timeout"]
+    if "ex1_path_starter_shuffled" not in st.session_state:
+        # Refresh an untouched board in sessions opened before this change.
+        if (
+            st.session_state.get("ex1_path_0") == ordered_starter
+            and len(st.session_state.get("ex1_path_1", [])) == len(available)
+            and set(st.session_state["ex1_path_1"]) == set(available)
+        ):
+            st.session_state["ex1_path_0"] = shuffled_starter(ordered_starter)
+        st.session_state["ex1_path_starter_shuffled"] = True
+    # Preserve learners' discarded snippets when an open session moves from
+    # the former three-column board to this two-column version.
+    if "ex1_path_2" in st.session_state:
+        discarded = st.session_state.pop("ex1_path_2")
+        st.session_state.setdefault(
+            "ex1_path_1",
+            [
                 item
-                for item in discarded
-                if item not in st.session_state["ex1_path_1"]
-                and item not in st.session_state.get("ex1_path_0", [])
-            )
-        pathway = board(
-            "path",
-            [shuffled_starter(ordered_starter), available],
-            snippets,
-            ["Patient pathway", "Available snippets"],
-            fixed_header="def attend_clinic(self, patient):",
-            descriptions=[
-                "The original simulation lines have been deliberately mixed up. Put them back in the order a patient would experience them: start waiting, request and obtain a nurse, record the wait, then complete treatment. After that, insert the logging snippets and replace the old request.",
-                "Drag new snippets into the pathway. Drag replaced or unwanted pathway code back here; unused suggestions can stay here too.",
+                for item in available
+                if item not in st.session_state.get("ex1_path_0", [])
             ],
         )
-        required = [
-            "arrival",
+        st.session_state["ex1_path_1"].extend(
+            item
+            for item in discarded
+            if item not in st.session_state["ex1_path_1"]
+            and item not in st.session_state.get("ex1_path_0", [])
+        )
+    pathway = board(
+        "path",
+        [shuffled_starter(ordered_starter), available],
+        snippets,
+        ["Patient pathway", "Available snippets"],
+        fixed_header="def attend_clinic(self, patient):",
+        descriptions=[
+            "The original simulation lines have been deliberately mixed up. Put them back in the order a patient would experience them: start waiting, request and obtain a nurse, record the wait, then complete treatment. After that, insert the logging snippets and replace the old request.",
+            "Drag new snippets into the pathway. Drag replaced or unwanted pathway code back here; unused suggestions can stay here too.",
+        ],
+    )
+    required = [
+        "arrival",
+        "startq",
+        "queue",
+        "request",
+        "yield",
+        "endq",
+        "sample",
+        "timeout",
+        "departure",
+    ]
+    rules = [
+        ("arrival", "queue", "Log arrival before the waiting stage."),
+        (
             "startq",
+            "request",
+            "Record the start of the wait before requesting a nurse.",
+        ),
+        (
             "queue",
             "request",
+            "Log waiting before requesting the resource, even when a nurse might be immediately available.",
+        ),
+        ("request", "yield", "Create the request before yielding it."),
+        (
             "yield",
             "endq",
+            "The patient must obtain the nurse before you record the end of their wait.",
+        ),
+        (
+            "endq",
+            "sample",
+            "Record the queue time before sampling the consultation duration.",
+        ),
+        (
             "sample",
             "timeout",
+            "Sample the consultation duration before using it in the timeout.",
+        ),
+        (
+            "timeout",
             "departure",
-        ]
-        rules = [
-            ("arrival", "queue", "Log arrival before the waiting stage."),
+            "Log departure after treatment, outside the resource's with block.",
+        ),
+    ]
+    if st.button("Check pathway", key="ex1_check_path", type="primary"):
+        checks = [
             (
-                "startq",
-                "request",
-                "Record the start of the wait before requesting a nurse.",
+                "old" not in pathway,
+                "Replace the original request: move it out of the pathway.",
             ),
             (
-                "queue",
-                "request",
-                "Log waiting before requesting the resource, even when a nurse might be immediately available.",
-            ),
-            ("request", "yield", "Create the request before yielding it."),
-            (
-                "yield",
-                "endq",
-                "The patient must obtain the nurse before you record the end of their wait.",
+                "placeholder" not in pathway,
+                "The store now records treatment start automatically. Remove the temporary treatment-as-a-queue event.",
             ),
             (
-                "endq",
-                "sample",
-                "Record the queue time before sampling the consultation duration.",
+                "manual" not in pathway,
+                "The configured store records resource use automatically. You do not need this manual call or nurse_obtained.",
             ),
             (
-                "sample",
-                "timeout",
-                "Sample the consultation duration before using it in the timeout.",
-            ),
-            (
-                "timeout",
-                "departure",
-                "Log departure after treatment, outside the resource's with block.",
+                set(pathway) == set(required) and len(pathway) == len(required),
+                "Keep all the simulation steps and add arrival, waiting, departure and the replacement request.",
             ),
         ]
-        if st.button("Check pathway", key="ex1_check_path", type="primary"):
-            checks = [
-                (
-                    entity == "patient.id",
-                    "Resource logging needs this patient's ID, not a replication ID or a resource count.",
-                ),
-                (
-                    start == "being_seen_by_nurse" and end == "nurse_treatment_ends",
-                    "The request names treatment start and end; waiting and departure are separate events.",
-                ),
-                (
-                    "old" not in pathway,
-                    "Replace the original request: move it out of the pathway.",
-                ),
-                (
-                    "placeholder" not in pathway,
-                    "The store now records treatment start automatically. Remove the temporary treatment-as-a-queue event.",
-                ),
-                (
-                    "manual" not in pathway,
-                    "The configured store records resource use automatically. You do not need this manual call or nurse_obtained.",
-                ),
-                (
-                    set(pathway) == set(required) and len(pathway) == len(required),
-                    "Keep all the simulation steps and add arrival, waiting, departure and the replacement request.",
-                ),
+        if set(pathway) == set(required):
+            checks += [
+                (pathway.index(a) < pathway.index(b), hint) for a, b, hint in rules
             ]
-            if set(pathway) == set(required):
-                checks += [
-                    (pathway.index(a) < pathway.index(b), hint) for a, b, hint in rules
-                ]
-            feedback(checks)
-        with st.expander("Show a worked pathway answer"):
-            answer = dict(snippets)
-            answer["request"] = (
-                '    with self.nurse.request(\n        entity_id=patient.id,\n        start_event="being_seen_by_nurse",\n        end_event="nurse_treatment_ends",\n    ) as req:'
-            )
-            st.code(
-                "def attend_clinic(self, patient):\n"
-                + "\n".join(answer[x] for x in required)
-            )
-            st.caption(
-                "Other valid placements of the queue timer are accepted. Automatic logging adds resource-use start on acquisition and end on release; arrival, waiting and departure still need explicit calls."
-            )
+        feedback(checks)
+    with st.expander("Show a worked pathway answer"):
+        answer = dict(snippets)
+        answer["request"] = (
+            '    with self.nurse.request(\n        entity_id=patient.id,\n        start_event="being_seen_by_nurse",\n        end_event="nurse_treatment_ends",\n    ) as req:'
+        )
+        st.code(
+            "def attend_clinic(self, patient):\n"
+            + "\n".join(answer[x] for x in required)
+        )
+        st.caption(
+            "Other valid placements of the queue timer are accepted. Automatic logging adds resource-use start on acquisition and end on release; arrival, waiting and departure still need explicit calls."
+        )
 
 with log_tab:
     st.subheader("Predict before inspecting")
