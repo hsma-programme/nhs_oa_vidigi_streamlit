@@ -130,14 +130,13 @@ def board(
 
 st.title("Add vidigi logging to your model")
 st.write(
-    "Work through three activities using a single nurse stage, then try the optional registration challenge. We use one model run and EventLogger here; TrialLogger comes in Exercise 4."
+    "Work through three short activities using a single nurse stage. We use one model run and EventLogger here; TrialLogger comes in Exercise 4."
 )
-setup_tab, pathway_tab, log_tab, extension_tab = st.tabs(
+setup_tab, pathway_tab, log_tab = st.tabs(
     [
         "1. Prepare the model",
         "2. Adapt the pathway",
-        "3. Predict the log",
-        "Optional: registration",
+        "3. Read the log",
     ]
 )
 
@@ -403,7 +402,7 @@ with pathway_tab:
         )
 
 with log_tab:
-    st.subheader("Predict before inspecting")
+    st.subheader("Read the event log")
     st.write(
         "Patient 7 arrives at minute 2 and immediately joins the nurse queue. The nurse becomes available at minute 5. Treatment lasts 4 minutes, then the patient leaves. The model runs beyond minute 9."
     )
@@ -414,139 +413,35 @@ with log_tab:
         "nurse_treatment_ends",
         "depart",
     ]
-    expected_times = [2, 2, 5, 9, 9]
-    expected_sources = [
-        "Explicit call",
-        "Explicit call",
-        "Automatic resource logging",
-        "Automatic resource logging",
-        "Explicit call",
-    ]
-    predictions = []
-    for event_name in events:
-        with st.container(border=True):
-            st.write(f"`{event_name}`")
-            a, b = st.columns(2)
-            with a:
-                time = choice("Time (minutes)", [2, 5, 9], f"time_{event_name}")
-            with b:
-                source = choice(
-                    "Recorded by",
-                    ["Explicit call", "Automatic resource logging"],
-                    f"source_{event_name}",
-                )
-            predictions.append((time, source))
-    waiting = choice(
-        "Does passing entity_id remove the need to log waiting?",
-        ["Yes", "No"],
-        "waiting",
+    st.dataframe(
+        pd.DataFrame(
+            {
+                "entity_id": [7] * 5,
+                "event": events,
+                "time": [2, 2, 5, 9, 9],
+                "resource_id": [None, None, 1, 1, None],
+            }
+        ),
+        hide_index=True,
     )
-    release = choice(
-        "What triggers the resource-use end event in this pathway?",
-        [
-            "Reaching the timeout statement",
-            "Releasing the nurse when the with block exits",
-            "Logging departure",
-        ],
-        "release",
+    st.caption(
+        "Illustrative excerpt assuming this nurse has resource ID 1. Waiting lasts 3 minutes; treatment lasts 4."
     )
-    if st.button("Check predictions", key="ex1_check_log", type="primary"):
-        checks = []
-        for event_name, predicted, time, source in zip(
-            events, predictions, expected_times, expected_sources
-        ):
-            checks.append(
-                (
-                    predicted == (time, source),
-                    f"Reconsider {event_name}: distinguish arriving, obtaining the nurse and finishing treatment, then decide whether the pathway or store records it.",
-                )
-            )
-        checks.extend(
+    automatic_events = st.multiselect(
+        "Which two events does the nurse store record automatically?",
+        events,
+        key="ex1_auto_events",
+    )
+    if st.button("Check answer", key="ex1_check_log", type="primary"):
+        feedback(
             [
                 (
-                    waiting == "No",
-                    "The store records resource use; the pathway still needs to record joining the queue.",
-                ),
-                (
-                    release == "Releasing the nurse when the with block exits",
-                    "The resource is released on leaving the with block. Merely reaching a timeout statement does not release it.",
-                ),
+                    set(automatic_events)
+                    == {"being_seen_by_nurse", "nurse_treatment_ends"},
+                    "The store records when a patient obtains and releases a nurse. Arrival, waiting and departure need explicit logging calls.",
+                )
             ]
-        )
-        feedback(checks)
-    with st.expander("Reveal the expected event log"):
-        st.dataframe(
-            pd.DataFrame(
-                {
-                    "entity_id": [7] * 5,
-                    "event": events,
-                    "time": expected_times,
-                    "resource_id": [None, None, 1, 1, None],
-                    "recorded_by": expected_sources,
-                }
-            ),
-            hide_index=True,
-        )
-        st.caption(
-            "Illustrative excerpt assuming this nurse has resource ID 1. recorded_by is an explanatory column added for this exercise. Both resource events refer to the same nurse. Waiting lasts 3 minutes; treatment lasts 4."
         )
     st.info(
         "In Exercise 2 you will position these events in an animation. Its layout event names must match the log; resource counts come from your model parameters."
     )
-
-with extension_tab:
-    st.subheader("Transfer the changes to registration")
-    st.write(
-        "Your original model has registration before the nurse. Complete the receptionist setup and request with fewer hints. Assume self.logger already exists."
-    )
-    st.code(
-        'self.receptionist = CLASS(\n    self.env,\n    COUNT_ARGUMENT=self.param.num_receptionists,\n    logger=LOGGER,\n    label="receptionist",\n)\n\nwith self.receptionist.request(\n    entity_id=ENTITY_ID,\n    start_event="being_seen_by_receptionist",\n    end_event="receptionist_visit_ends",\n) as req:\n    yield req\n    # Existing registration calculation and timeout stay here.'
-    )
-    values = [
-        st.text_input(label, key=f"ex1_reg_{key}")
-        for label, key in [
-            ("CLASS", "class"),
-            ("COUNT_ARGUMENT", "count"),
-            ("LOGGER", "logger"),
-            ("ENTITY_ID", "entity"),
-        ]
-    ]
-    boundary = choice(
-        "Where do arrival and departure belong in the two-stage clinic?",
-        [
-            "Around each resource stage",
-            "One arrival before registration and one departure after the nurse",
-            "Only around registration",
-        ],
-        "boundary",
-    )
-    if st.button("Check registration", key="ex1_check_reg", type="primary"):
-        feedback(
-            [
-                (
-                    values[0].strip() == "VidigiStore",
-                    "Choose the class that manages identifiable resources.",
-                ),
-                (
-                    values[1].strip() == "num_resources",
-                    "Use the store's argument for the number of receptionists.",
-                ),
-                (
-                    values[2].strip() == "self.logger",
-                    "Use the existing logger instance.",
-                ),
-                (
-                    values[3].strip() == "patient.id",
-                    "Identify the patient making this request.",
-                ),
-                (
-                    boundary
-                    == "One arrival before registration and one departure after the nurse",
-                    "Arrival and departure describe the whole clinic visit. Each stage has its own waiting and treatment events.",
-                ),
-            ]
-        )
-    with st.expander("Show a worked registration answer"):
-        st.code(
-            'self.receptionist = VidigiStore(\n    self.env,\n    num_resources=self.param.num_receptionists,\n    logger=self.logger,\n    label="receptionist",\n)\n\n# Inside attend_clinic, before the existing registration work:\nself.logger.log_arrival(entity_id=patient.id)\nself.logger.log_queue(entity_id=patient.id, event="receptionist_wait_begins")\nwith self.receptionist.request(\n    entity_id=patient.id,\n    start_event="being_seen_by_receptionist",\n    end_event="receptionist_visit_ends",\n) as req:\n    yield req\n    # Existing registration calculation and timeout\n\n# Nurse waiting and treatment follow here.\n# Log departure once, after the nurse stage.'
-        )

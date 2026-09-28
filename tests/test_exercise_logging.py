@@ -99,6 +99,21 @@ class ExerciseTests(unittest.TestCase):
         self.assertNotEqual(app.session_state[names[0]], ordered_starter)
         self.assertFalse(app.exception)
 
+    def test_log_bridge_identifies_automatic_resource_events(self):
+        app = AppTest.from_file('../streamlit_app.py', default_timeout=20).run()
+        self.assertFalse(app.exception)
+        self.assertEqual(len(app.dataframe), 1)
+        self.assertFalse(any(button.key == 'ex1_check_reg' for button in app.button))
+        app.multiselect(key='ex1_auto_events').set_value(['arrival'])
+        app.button(key='ex1_check_log').click().run()
+        self.assertTrue(app.warning)
+        app.multiselect(key='ex1_auto_events').set_value(
+            ['being_seen_by_nurse', 'nurse_treatment_ends']
+        )
+        app.button(key='ex1_check_log').click().run()
+        self.assertTrue(app.success)
+        self.assertFalse(app.exception)
+
     def test_automatic_logging_pairs_resources_without_duplicates(self):
         # Exercise every resource pool, with enough capacity to complete visits.
         model = Model(Param(sim_duration=300, specialist_prob=1,
