@@ -46,15 +46,6 @@ st.html(
         min-height: 3.5rem;
         font-size: 1.15rem;
         font-weight: 600;
-        background-color: #be185d;
-        border-color: #be185d;
-        color: #ffffff;
-    }
-    .st-key-animate_button button:hover,
-    .st-key-animate_button button:focus:not(:active) {
-        background-color: #9d174d;
-        border-color: #9d174d;
-        color: #ffffff;
     }
 
     /* ---- Let the ADVANCED section recede until you engage with it ---- */
@@ -623,7 +614,7 @@ class Animation:
 @st.fragment
 def render_anim():
     button_run_pressed = st.button(
-        "Animate simulation",
+        "Click to animate simulation",
         key="animate_button",
         type="primary",
         icon=":material/play_arrow:",
