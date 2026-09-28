@@ -99,19 +99,25 @@ class ExerciseTests(unittest.TestCase):
         self.assertNotEqual(app.session_state[names[0]], ordered_starter)
         self.assertFalse(app.exception)
 
-    def test_log_bridge_identifies_automatic_resource_events(self):
+    def test_log_bridge_predicts_snapshot_positions(self):
         app = AppTest.from_file('../streamlit_app.py', default_timeout=20).run()
         self.assertFalse(app.exception)
         self.assertEqual(len(app.dataframe), 1)
-        self.assertFalse(any(button.key == 'ex1_check_reg' for button in app.button))
-        app.multiselect(key='ex1_auto_events').set_value(['arrival'])
         app.button(key='ex1_check_log').click().run()
         self.assertTrue(app.warning)
-        app.multiselect(key='ex1_auto_events').set_value(
-            ['being_seen_by_nurse', 'nurse_treatment_ends']
-        )
+        app.selectbox(key='ex1_snapshot_time').select(4)
+        app.selectbox(key='ex1_snapshot_location').select('With the nurse')
         app.button(key='ex1_check_log').click().run()
-        self.assertTrue(app.success)
+        self.assertTrue(app.warning)
+        for time, location in [
+            (4, 'Waiting for a nurse'),
+            (6, 'With the nurse'),
+            (10, 'No longer in the animation'),
+        ]:
+            app.selectbox(key='ex1_snapshot_time').select(time)
+            app.selectbox(key='ex1_snapshot_location').select(location)
+            app.button(key='ex1_check_log').click().run()
+            self.assertTrue(app.success)
         self.assertFalse(app.exception)
 
     def test_automatic_logging_pairs_resources_without_duplicates(self):

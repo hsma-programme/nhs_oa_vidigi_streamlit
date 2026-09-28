@@ -402,7 +402,7 @@ with pathway_tab:
         )
 
 with log_tab:
-    st.subheader("Read the event log")
+    st.subheader("From event log to animation snapshots")
     st.write(
         "Patient 7 arrives at minute 2 and immediately joins the nurse queue. The nurse becomes available at minute 5. Treatment lasts 4 minutes, then the patient leaves. The model runs beyond minute 9."
     )
@@ -427,21 +427,44 @@ with log_tab:
     st.caption(
         "Illustrative excerpt assuming this nurse has resource ID 1. Waiting lasts 3 minutes; treatment lasts 4."
     )
-    automatic_events = st.multiselect(
-        "Which two events does the nurse store record automatically?",
-        events,
-        key="ex1_auto_events",
+    st.write(
+        "At each snapshot, vidigi uses the latest event each patient has reached to decide where to show them. Patients who have departed no longer appear."
+    )
+    snapshot_time = st.selectbox(
+        "Choose a snapshot time (minutes)",
+        [4, 6, 10],
+        index=None,
+        placeholder="Choose a time",
+        key="ex1_snapshot_time",
+    )
+    location = choice(
+        "Where will patient 7 appear?",
+        ["Waiting for a nurse", "With the nurse", "No longer in the animation"],
+        "snapshot_location",
     )
     if st.button("Check answer", key="ex1_check_log", type="primary"):
-        feedback(
-            [
-                (
-                    set(automatic_events)
-                    == {"being_seen_by_nurse", "nurse_treatment_ends"},
-                    "The store records when a patient obtains and releases a nurse. Arrival, waiting and departure need explicit logging calls.",
-                )
-            ]
-        )
+        if snapshot_time is None or location is None:
+            st.warning("Choose a snapshot time and a patient position first.")
+        else:
+            positions = {
+                4: "Waiting for a nurse",
+                6: "With the nurse",
+                10: "No longer in the animation",
+            }
+            explanations = {
+                4: "At minute 4, the latest event is `nurse_wait_begins` at minute 2, so patient 7 is still waiting.",
+                6: "At minute 6, the latest event is `being_seen_by_nurse` at minute 5, so patient 7 is with the nurse.",
+                10: "Patient 7 departed at minute 9, so they are absent from the minute 10 snapshot.",
+            }
+            feedback(
+                [
+                    (
+                        location == positions[snapshot_time],
+                        "Look for the last event at or before this time, and check whether the patient has departed.",
+                    )
+                ]
+            )
+            st.info(explanations[snapshot_time])
     st.info(
-        "In Exercise 2 you will position these events in an animation. Its layout event names must match the log; resource counts come from your model parameters."
+        "In Exercise 2, try changing the time between snapshots. Wider gaps create fewer frames and can skip over short-lived states. The layout event names must match the log."
     )

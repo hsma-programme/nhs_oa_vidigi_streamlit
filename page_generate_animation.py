@@ -508,13 +508,17 @@ layout = create_event_position_df(
 
     anim_code = f"""
 what_if_model.logger.animate_activity_log(
-    event_log=self.event_log, scenario=self.params,
-    event_position_df=self.layout, plotly_height=600,
+    event_log=self.event_log,
+    scenario=self.params,
+    event_position_df=self.layout,
+    plotly_height=600,
     every_x_time_units={time_interval_slider},
     warm_up={warm_up_minutes},
-    entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
+    entity_icon_size={entity_icon_size_slider},
+    gap_between_entities={gap_between_entities_slider},
     wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
-    gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
+    gap_between_resources={gap_between_resources_slider},
+    gap_between_queue_rows={gap_between_queue_rows_slider},
 )
 """
 
