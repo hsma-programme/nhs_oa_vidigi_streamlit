@@ -289,6 +289,10 @@ with tab_build:
     flash_on_change("dfg_params", params_code)
     flash_on_change("dfg_code", dfg_code)
 
+    st.info(
+        "All done? Scroll back up and click on 'View the DFG' to see what the directly-follows graph looks like."
+    )
+
 with tab_run:
     st.write(
         "Start with the core activity. The random-seed and occupancy activities are optional if you have time. The graph updates automatically when you change a sidebar setting."

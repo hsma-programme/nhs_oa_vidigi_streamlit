@@ -251,6 +251,10 @@ with setup_tab:
                 "The label identifies the resource pool. It does not name a treatment event."
             )
 
+    st.info(
+        "All done? Scroll back up and click on '2. Adapt the pathway' to move on to the next part of this exercise."
+    )
+
 with pathway_tab:
     st.subheader("Keep, replace and insert")
     st.write(
@@ -400,6 +404,10 @@ with pathway_tab:
             "Other valid placements of the queue timer are accepted. Automatic logging adds resource-use start on acquisition and end on release; arrival, waiting and departure still need explicit calls."
         )
 
+    st.info(
+        "All done? Scroll back up and click on '3. Read the log' to move on to the next part of this exercise."
+    )
+
 with log_tab:
     st.subheader("From event log to animation snapshots")
     st.write(
@@ -457,4 +465,7 @@ with log_tab:
             st.info(explanations[snapshot_time])
     st.info(
         "In Exercise 2, try changing the time between snapshots. Wider gaps create fewer frames and can skip over short-lived states. The layout event names must match the log."
+    )
+    st.info(
+        "All done? Click on 'Exercise 2' in the navigation menu to build and run your own animation."
     )

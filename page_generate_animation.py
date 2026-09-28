@@ -595,6 +595,10 @@ fig = animate_activity_log(
     flash_on_change("code_layout", event_position_code)
     flash_on_change("code_anim", anim_code)
 
+    st.info(
+        "All done? Scroll back up and click on 'Run the animation' to see what the animation looks like."
+    )
+
 
 class Animation:
     def __init__(self, event_log, params):
