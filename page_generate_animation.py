@@ -132,7 +132,8 @@ with st.sidebar:
         options=list(ENTITY_ICON_SETS),
         format_func=lambda name: (
             f"{name} — {' '.join(ENTITY_ICON_SETS[name])}"
-            if ENTITY_ICON_SETS[name] else "Default (vidigi people)"
+            if ENTITY_ICON_SETS[name]
+            else "Default (vidigi people)"
         ),
         key="entity_icon_set_input",
         help="Icons are assigned to patients from the selected set. Walking gives every patient the same icon.",
@@ -142,7 +143,8 @@ with st.sidebar:
         options=list(RESOURCE_ICONS),
         format_func=lambda name: (
             f"{name} — {RESOURCE_ICONS[name]}"
-            if RESOURCE_ICONS[name] else "Default (blue circle)"
+            if RESOURCE_ICONS[name]
+            else "Default (blue circle)"
         ),
         key="resource_icon_input",
         help="Use this icon for every receptionist, nurse and specialist resource.",
@@ -488,9 +490,15 @@ what_if_params = Param(
     sd_nurse_consult_time=4,
 )
 
-what_if_model = Model(what_if_params, replication_id=1, random_seed=42)
+what_if_model = Model(
+    what_if_params,
+    replication_id=1,
+    random_seed=42
+    )
 what_if_model.run_model()
-event_log = what_if_model.get_vidigi_event_log()
+event_log = (
+    what_if_model.get_vidigi_event_log()
+    )
 """
 
     event_position_code = f"""
