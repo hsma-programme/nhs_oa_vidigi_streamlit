@@ -167,7 +167,7 @@ st.html("""<style>
 
 st.title("Trial plots playground")
 st.write(
-    "Explore variation across repeated simulation runs. Change the simulation settings in the sidebar, then adjust each plot using its controls. **Plots and code update automatically.**"
+    "Explore variation across repeated simulation runs. Start with the core queue-size activity, then choose one other plot if time allows. Change the simulation settings in the sidebar; **plots and code update automatically.**"
 )
 
 with st.sidebar:
@@ -344,16 +344,12 @@ PAIRS = {
 @st.fragment
 def render_queue_tab():
     st.info(
-        "**Activity: keep each average queue below 5.** Starting with an 8-hour "
-        "simulation, how many receptionists, nurses and specialists do you need "
-        "to keep the mean queue below 5 patients at every plotted time point "
-        'for all three steps? Turn off "Show individual runs" to focus on the '
-        'mean across replications. "Share queue size axis" is off by default, '
-        "so read each panel's own vertical scale when checking the target. "
-        "Keep the other simulation settings fixed and "
-        "warm-up at 0, then adjust each resource count. Does reducing one queue "
-        "put more pressure on the next step? Finally, try more replications or "
-        "a different random seed to see whether your choice still meets the target."
+        "**Core activity: compare queue sizes.** Keep the 8-hour simulation and "
+        'random seed fixed. Turn off "Show individual runs" to focus on the mean '
+        "across replications. Compare the nurse and specialist queues, then increase "
+        '"Number of nurses" from 1 to 2 in the sidebar. How does the nurse queue '
+        "change? Does the specialist queue change too? Read each panel's vertical "
+        'scale separately: "Share queue size axis" is off by default.'
     )
     controls, output = st.columns([0.38, 0.62])
     with controls:
@@ -781,11 +777,11 @@ def render_arrival_tab():
 
 queue_tab, duration_tab, resource_tab, resource_time_tab, arrival_tab = st.tabs(
     [
-        "Queue size",
-        "Duration distribution",
-        "Resource utilisation",
-        "Resource utilisation over time",
-        "Metric vs arrival time",
+        "Core: queue size",
+        "Explore: waiting times",
+        "Explore: resource use",
+        "Explore: pressure over time",
+        "Explore: arrival patterns",
     ]
 )
 with queue_tab:
