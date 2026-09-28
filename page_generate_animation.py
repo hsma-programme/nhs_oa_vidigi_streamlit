@@ -5,6 +5,25 @@ from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from model import Param, Model  # , Trial
 
+ENTITY_ICON_SETS = {
+    "Default": None,
+    "Walking (all the same)": ["🚶"],
+    "Fun": ["😎", "🥳", "🤩", "🤪", "🤠"],
+    "Sick faces": ["🤮", "🤢", "🤒", "🤕"],
+    "Animals": ["🐶", "🐱", "🐰", "🐼", "🦊"],
+    "Space": ["👽", "🤖", "👾", "🚀", "🛸"],
+}
+
+RESOURCE_ICONS = {
+    "Default": None,
+    "Bed": "🛏️",
+    "Nurse": "👩‍⚕️",
+    "Doctor": "👨‍⚕️",
+    "Hospital": "🏥",
+    "Chair": "🪑",
+    "Computer": "🖥️",
+}
+
 with open("styles.css") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
@@ -108,6 +127,29 @@ with col2_intro:
 
 with st.sidebar:
     st.markdown("**Animation Parameters**")
+    entity_icon_set = st.selectbox(
+        "Entity icon set",
+        options=list(ENTITY_ICON_SETS),
+        format_func=lambda name: (
+            f"{name} — {' '.join(ENTITY_ICON_SETS[name])}"
+            if ENTITY_ICON_SETS[name] else "Default (vidigi people)"
+        ),
+        key="entity_icon_set_input",
+        help="Icons are assigned to patients from the selected set. Walking gives every patient the same icon.",
+    )
+    resource_icon_choice = st.selectbox(
+        "Resource icon",
+        options=list(RESOURCE_ICONS),
+        format_func=lambda name: (
+            f"{name} — {RESOURCE_ICONS[name]}"
+            if RESOURCE_ICONS[name] else "Default (blue circle)"
+        ),
+        key="resource_icon_input",
+        help="Use this icon for every receptionist, nurse and specialist resource.",
+    )
+    custom_entity_icon_list = ENTITY_ICON_SETS[entity_icon_set]
+    custom_resource_icon = RESOURCE_ICONS[resource_icon_choice]
+
     time_interval_slider = st.slider(
         "Time between snapshots",
         value=1,
@@ -217,7 +259,7 @@ tab_build, tab_run = st.tabs(["Build your animation", "Run the animation"])
 
 with tab_build:
     st.write("""
-Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
+Use the controls in the sidebar to choose entity and resource icons and set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
 
     advanced = st.container(key="advanced_section")
@@ -514,6 +556,8 @@ fig = animate_activity_log(
     every_x_time_units={time_interval_slider},
     warm_up={warm_up_minutes},
     entity_icon_size={entity_icon_size_slider},
+    custom_entity_icon_list={custom_entity_icon_list!r},
+    custom_resource_icon={custom_resource_icon!r},
     gap_between_entities={gap_between_entities_slider},
     wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
     gap_between_resources={gap_between_resources_slider},
@@ -614,6 +658,8 @@ class Animation:
             gap_between_resources=gap_between_resources_slider,
             plotly_height=600,
             entity_icon_size=entity_icon_size_slider,
+            custom_entity_icon_list=custom_entity_icon_list,
+            custom_resource_icon=custom_resource_icon,
             gap_between_queue_rows=gap_between_queue_rows_slider,
             wrap_queues_at=wrap_queues_at,
         )
