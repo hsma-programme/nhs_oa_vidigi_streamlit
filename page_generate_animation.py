@@ -433,6 +433,8 @@ create_event_position_df(
     st.markdown("##### Your code so far")
 
     params_code = f"""
+from model import Param, Model
+
 what_if_params = Param(
     num_nurses={num_nurses_slider},
     num_receptionists={num_recep_slider},
@@ -443,11 +445,14 @@ what_if_params = Param(
     sd_nurse_consult_time=4,
 )
 
-what_if_model = Model(base_case_params, replication_id=1)
+what_if_model = Model(what_if_params, replication_id=1, random_seed=42)
 what_if_model.run_model()
+event_log = what_if_model.get_vidigi_event_log()
 """
 
     event_position_code = f"""
+from vidigi.utils import create_event_position_df, EventPosition
+
 layout = create_event_position_df(
     [
         EventPosition(
@@ -498,10 +503,12 @@ layout = create_event_position_df(
 """
 
     anim_code = f"""
-what_if_model.logger.animate_activity_log(
-    event_log=self.event_log,
-    scenario=self.params,
-    event_position_df=self.layout,
+from vidigi.animation import animate_activity_log
+
+fig = animate_activity_log(
+    event_log=event_log,
+    scenario=what_if_params,
+    event_position_df=layout,
     plotly_height=600,
     every_x_time_units={time_interval_slider},
     warm_up={warm_up_minutes},
