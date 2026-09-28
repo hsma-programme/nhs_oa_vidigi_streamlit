@@ -290,13 +290,17 @@ with tab_build:
     flash_on_change("dfg_code", dfg_code)
 
 with tab_run:
+    st.write(
+        "Start with the core activity. The random-seed and occupancy activities are optional if you have time. The graph updates automatically when you change a sidebar setting."
+    )
     tab_ex_1_dfg, tab_ex_2_dfg, tab_ex_3_dfg = st.tabs(
-        ["Exercise 1", "Exercise 2", "Exercise 3"]
+        ["Core: observed probability", "Extra: random seeds", "Extra: occupancy"]
     )
     tab_ex_1_dfg.info(
         "Keep the random "
-        "seed fixed and make sure 'Probability of needing a specialist' is set to to 0.3 "
-        "and 'Show transition probabilities' is set to True. Run a 2-hour simulation. "
+        "seed fixed and make sure 'Probability of needing a specialist' is set to 0.3 "
+        "and 'Show transition probabilities' is enabled. Set 'Simulation duration' "
+        "to 2 hours in the sidebar and watch the graph refresh. "
         "Find the arrow leading to the specialist: how does its observed "
         "probability compare with 0.3? Increase the duration to 4 hours "
         "without changing the seed and compare again. Think about why the "
