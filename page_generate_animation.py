@@ -24,6 +24,19 @@ RESOURCE_ICONS = {
     "Computer": "🖥️",
 }
 
+TIMELINE_FORMATS = {
+    "Elapsed minutes": None,
+    "Simulation day and clock (24-hour)": "day_clock",
+    "Simulation day and clock (12-hour)": "day_clock_ampm",
+}
+
+# Frame and transition durations in milliseconds; normal preserves vidigi's defaults.
+PLAYBACK_SPEEDS = {
+    "Slow": (800, 1200),
+    "Normal": (400, 600),
+    "Fast": (200, 300),
+}
+
 with open("styles.css") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
@@ -152,6 +165,22 @@ with st.sidebar:
     custom_entity_icon_list = ENTITY_ICON_SETS[entity_icon_set]
     custom_resource_icon = RESOURCE_ICONS[resource_icon_choice]
 
+    timeline_format = st.selectbox(
+        "Timeline format",
+        options=list(TIMELINE_FORMATS),
+        key="timeline_format_input",
+        help="Choose how time appears on the animation timeline. Simulation times remain in minutes.",
+    )
+    time_display_units = TIMELINE_FORMATS[timeline_format]
+    playback_speed = st.selectbox(
+        "Playback speed",
+        options=list(PLAYBACK_SPEEDS),
+        index=1,
+        key="playback_speed_input",
+        help="Adjusts both the frame duration and movement transition duration. It does not change the time between snapshots.",
+    )
+    frame_duration, frame_transition_duration = PLAYBACK_SPEEDS[playback_speed]
+
     time_interval_slider = st.slider(
         "Time between snapshots",
         value=1,
@@ -268,6 +297,11 @@ Use the controls in the sidebar to choose entity and resource icons and set the 
     with advanced.expander(
         "**ADVANCED: Adjust Event Positions**\n\nWant to try changing where each event appears on the screen? Click here to make those changes."
     ):
+        setup_mode = st.toggle(
+            "Show layout grid",
+            key="layout_grid_input",
+            help="Show grid lines and axis coordinates in the animation to help position events. Run the animation to see the grid.",
+        )
         cola, colb, colc, cold = st.columns(4)
 
         with cola, st.container(border=True):
@@ -562,6 +596,10 @@ fig = animate_activity_log(
     event_position_df=layout,
     plotly_height=600,
     every_x_time_units={time_interval_slider},
+    time_display_units={time_display_units!r},
+    frame_duration={frame_duration},
+    frame_transition_duration={frame_transition_duration},
+    setup_mode={setup_mode},
     warm_up={warm_up_minutes},
     entity_icon_size={entity_icon_size_slider},
     custom_entity_icon_list={custom_entity_icon_list!r},
@@ -663,6 +701,10 @@ class Animation:
             event_log=self.event_log,
             event_position_df=self.layout,
             every_x_time_units=time_interval,
+            time_display_units=time_display_units,
+            frame_duration=frame_duration,
+            frame_transition_duration=frame_transition_duration,
+            setup_mode=setup_mode,
             warm_up=warm_up_minutes,
             scenario=self.params,
             gap_between_entities=gap_between_entities_slider,
