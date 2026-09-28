@@ -93,7 +93,7 @@ st.html(
     /* ---- Repository / website icon links in the top bar ---- */
     /* Streamlit can't put custom widgets in its header, so these are fixed
        over the right-hand end of it, just left of the toolbar menu. The icons
-       are CSS masks (st.html's sanitiser strips inline <svg>), so they take
+       are CSS masks (the sanitiser strips inline SVG markup), so they take
        the link colour. */
     .top-bar-links {
         position: fixed;
@@ -145,22 +145,26 @@ st.html(
         margin-bottom: 0.25rem;
     }
     </style>
+    """.replace("__BANNER_URL__", _BANNER_URL)
+    .replace("__GITHUB_ICON__", _GITHUB_ICON)
+    .replace("__WEB_ICON__", _WEB_ICON)
+)
 
+# Kept separate from the style block above: a style-only st.html goes to the
+# hidden event container and applies globally, which mixed content would break.
+st.html(
+    f"""
     <div class="top-bar-links">
-        <a href="__REPO_URL__" target="_blank" title="View the code on GitHub"
+        <a href="{_REPO_URL}" target="_blank" title="View the code on GitHub"
            aria-label="View the code on GitHub">
             <span class="icon icon-github"></span>
         </a>
-        <a href="__SITE_URL__" target="_blank" title="Visit hsma.co.uk"
+        <a href="{_SITE_URL}" target="_blank" title="Visit hsma.co.uk"
            aria-label="Visit hsma.co.uk">
             <span class="icon icon-web"></span>
         </a>
     </div>
-    """.replace("__BANNER_URL__", _BANNER_URL)
-    .replace("__GITHUB_ICON__", _GITHUB_ICON)
-    .replace("__WEB_ICON__", _WEB_ICON)
-    .replace("__REPO_URL__", _REPO_URL)
-    .replace("__SITE_URL__", _SITE_URL)
+    """
 )
 
 pg = st.navigation(

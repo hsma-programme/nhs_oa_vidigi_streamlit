@@ -73,8 +73,9 @@ st.html(
         background-color: rgba(253, 224, 71, var(--tokflash-code_anim, 0));
     }
 
-    /* The flash helper and the style block above ship as empty html elements. */
-    [data-testid="stHtml"] {
+    /* The flash helper and the style block above ship as empty html elements.
+       Leave the top-bar links (from streamlit_app.py) visible. */
+    [data-testid="stHtml"]:not(:has(.top-bar-links)) {
         display: none;
     }
 
