@@ -730,7 +730,7 @@ class Animation:
 @st.fragment
 def render_anim():
     button_run_pressed = st.button(
-        "Click to animate simulation",
+        "Click to create the animation of the simulation",
         key="animate_button",
         type="primary",
         icon=":material/play_arrow:",
