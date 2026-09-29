@@ -75,7 +75,14 @@ def queue_plot(parameters, first_seed, options):
     )
     # Match each vertical facet label to its subplot before moving it above.
     axes = [fig.layout[name] for name in fig.layout if name.startswith("yaxis")]
+    queue_titles = {
+        "receptionist_wait_begins": "Queue for Receptionist",
+        "nurse_wait_begins": "Queue for Nurse",
+        "specialist_wait_begins": "Queue for Specialist",
+    }
     for title in fig.layout.annotations:
+        if title.text in queue_titles:
+            title.text = queue_titles[title.text]
         if title.textangle == 90:
             axis = min(axes, key=lambda axis: abs(sum(axis.domain) / 2 - title.y))
             x_axis = fig.layout["xaxis" + axis.anchor[1:]]
@@ -185,7 +192,8 @@ st.html("""<style>
 
 st.title("Trial plots playground")
 st.write(
-    "Explore variation across repeated simulation runs. Start with the core queue-size activity, then choose one other plot if time allows. Change the simulation settings in the sidebar; **plots and code update automatically. Please wait a few seconds after changing a parameter.**"
+    "Explore variation across repeated simulation runs. Start with the core queue-size activity, then choose one other plot if time allows. Change the simulation settings in the sidebar.\n\n"
+    "**Plots and code update automatically. Please wait a few seconds after changing a parameter for the graphs to update.**"
 )
 
 with st.sidebar:
@@ -538,6 +546,8 @@ def render_duration_tab():
                 "No completed durations are available for these settings. Try a longer simulation, a shorter warm-up, or another duration."
             )
         else:
+            if kind in ("box", "violin"):
+                fig.update_xaxes(title_text="Run")
             st.plotly_chart(fig, width="stretch", key="trial_duration_plot")
             plot_status.empty()
 
