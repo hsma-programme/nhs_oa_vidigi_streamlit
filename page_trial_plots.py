@@ -51,6 +51,7 @@ def reset_parameters():
             "trial_arrival_warmup": 0,
         }
     )
+    st.toast("Defaults restored. Updating the plots...")
 
 
 @st.cache_data(max_entries=8, show_spinner=False)

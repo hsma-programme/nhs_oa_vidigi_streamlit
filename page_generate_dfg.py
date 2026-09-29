@@ -36,6 +36,7 @@ def reset_dfg_settings():
         "dfg_zoom",
     ):
         st.session_state.pop(key, None)
+    st.toast("Defaults restored. Updating the DFG...")
 
 
 @st.cache_data(max_entries=32, show_spinner=False)

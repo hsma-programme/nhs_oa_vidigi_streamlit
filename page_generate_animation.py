@@ -54,6 +54,7 @@ def reset_animation_settings():
         "depart_label_input",
     ):
         st.session_state.pop(key, None)
+    st.toast("Defaults restored. Updating the controls and code preview...")
 
 
 ENTITY_ICON_SETS = {
