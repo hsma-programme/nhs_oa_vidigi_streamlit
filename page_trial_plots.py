@@ -410,9 +410,11 @@ def render_queue_tab():
         if not selected:
             st.info("Select at least one queue to draw the plot.")
         else:
-            with st.spinner("Building the queue size plot..."):
+            with st.status("**Updating queue size plot ? please wait?**", expanded=True) as plot_status:
+                st.write("Preparing simulation results and rebuilding the plot with your current settings.")
                 fig = queue_plot(parameters, first_seed, options)
             st.plotly_chart(fig, width="stretch", key="trial_queue_plot")
+            plot_status.update(label="**Plot updated with your current settings**", state="complete", expanded=False)
 
 
 @st.fragment
@@ -505,9 +507,11 @@ def render_duration_tab():
                 "patient who waited much longer than most."
             )
         try:
-            with st.spinner("Building the duration distribution..."):
+            with st.status("**Updating waiting time distribution ? please wait?**", expanded=True) as plot_status:
+                st.write("Preparing simulation results and rebuilding the plot with your current settings.")
                 fig = duration_plot(parameters, first_seed, options)
         except ValueError as error:
+            plot_status.update(label="**Unable to build plot for these settings**", state="error", expanded=False)
             if not any(
                 message in str(error) for message in ("No complete", "not found in")
             ):
@@ -517,6 +521,7 @@ def render_duration_tab():
             )
         else:
             st.plotly_chart(fig, width="stretch", key="trial_duration_plot")
+            plot_status.update(label="**Plot updated with your current settings**", state="complete", expanded=False)
 
 
 @st.fragment
@@ -594,11 +599,13 @@ def render_resource_tab():
         st.caption(
             "Compare how heavily each step uses its available resources. A utilisation of 1 means all available units were busy throughout the measured window."
         )
-        with st.spinner("Building the resource utilisation plot..."):
+        with st.status("**Updating resource use plot ? please wait?**", expanded=True) as plot_status:
+            st.write("Preparing simulation results and rebuilding the plot with your current settings.")
             fig = additional_plot(
                 parameters, first_seed, "plot_resource_utilisation", options
             )
         st.plotly_chart(fig, width="stretch", key="trial_resource_plot")
+        plot_status.update(label="**Plot updated with your current settings**", state="complete", expanded=False)
 
 
 @st.fragment
@@ -670,11 +677,13 @@ def render_resource_time_tab():
         st.caption(
             "Follow resource use across the simulation. Counts show how many units were busy; proportions compare busy units with the available capacity."
         )
-        with st.spinner("Building the resource use over time plot..."):
+        with st.status("**Updating pressure over time plot ? please wait?**", expanded=True) as plot_status:
+            st.write("Preparing simulation results and rebuilding the plot with your current settings.")
             fig = additional_plot(
                 parameters, first_seed, "plot_resource_utilisation_over_time", options
             )
         st.plotly_chart(fig, width="stretch", key="trial_resource_time_plot")
+        plot_status.update(label="**Plot updated with your current settings**", state="complete", expanded=False)
 
 
 @st.fragment
@@ -758,11 +767,13 @@ def render_arrival_tab():
             "Each point is a patient with both events recorded. Look for changes in waits or consultation times for patients arriving later in the run."
         )
         try:
-            with st.spinner("Building the arrival time plot..."):
+            with st.status("**Updating arrival patterns plot ? please wait?**", expanded=True) as plot_status:
+                st.write("Preparing simulation results and rebuilding the plot with your current settings.")
                 fig = additional_plot(
                     parameters, first_seed, "plot_metric_vs_arrival_time", options
                 )
         except ValueError as error:
+            plot_status.update(label="**Unable to build plot for these settings**", state="error", expanded=False)
             if not any(
                 message in str(error)
                 for message in ("No points to plot", "not found in")
@@ -773,6 +784,7 @@ def render_arrival_tab():
             )
         else:
             st.plotly_chart(fig, width="stretch", key="trial_arrival_plot")
+            plot_status.update(label="**Plot updated with your current settings**", state="complete", expanded=False)
 
 
 queue_tab, duration_tab, resource_tab, resource_time_tab, arrival_tab = st.tabs(
