@@ -8,6 +8,36 @@ from code_preview import flash_on_change
 from model import Model, Param
 
 
+def reset_dfg_settings():
+    """Restore only Exercise 3 widgets using their declared defaults."""
+    for key in (
+        "dfg_direction",
+        "dfg_time_metric",
+        "dfg_time_unit",
+        "dfg_min_frequency",
+        "dfg_min_probability",
+        "dfg_node_counts",
+        "dfg_edge_counts",
+        "dfg_probabilities",
+        "dfg_show_metric",
+        "dfg_show_occupancy",
+        "dfg_occupancy_interval",
+        "dfg_dashed",
+        "dfg_dash_threshold",
+        "dfg_wrap",
+        "dfg_wrap_at",
+        "dfg_iat",
+        "dfg_receptionists",
+        "dfg_nurses",
+        "dfg_specialists",
+        "dfg_specialist_prob",
+        "dfg_duration_hours",
+        "dfg_seed",
+        "dfg_zoom",
+    ):
+        st.session_state.pop(key, None)
+
+
 @st.cache_data(max_entries=32, show_spinner=False)
 def simulation_log(parameters, random_seed):
     model = Model(Param(**parameters), replication_id=1, random_seed=random_seed)
@@ -55,6 +85,13 @@ description.write(
 )
 
 with st.sidebar:
+    st.button(
+        "Reset to defaults",
+        key="dfg_reset",
+        on_click=reset_dfg_settings,
+        width="stretch",
+        help="Restore all simulation, DFG and graph zoom settings for Exercise 3.",
+    )
     st.markdown("**DFG parameters**")
     direction = st.selectbox(
         "Direction",
@@ -315,10 +352,9 @@ with tab_run:
         ["Core: observed probability", "Extra: random seeds", "Extra: occupancy"]
     )
     tab_ex_1_dfg.info(
-        "**TASK:** Keep the random "
-        "seed fixed and make sure 'Probability of needing a specialist' is set to 0.3 "
-        "and 'Show transition probabilities' is enabled. Set 'Simulation duration' "
-        "to 2 hours in the sidebar and watch the graph refresh. "
+        "**TASK:** Click 'Reset to defaults' at the top of the sidebar. "
+        "Then set 'Simulation duration' to 2 hours and watch the graph refresh, "
+        "keeping the other settings at their defaults. "
         "Find the arrow leading to the specialist: how does its observed "
         "probability compare with 0.3? Increase the duration to 12 hours "
         "without changing the seed and compare again. Think about why the "
