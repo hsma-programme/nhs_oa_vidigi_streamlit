@@ -236,6 +236,17 @@ with tab_build:
     st.write(
         "Use the sidebar to adjust the simulation and DFG settings. The assembled code updates as you make changes."
     )
+    st.info(
+        "**TASK:** Experiment with the sidebar controls and watch the highlighted "
+        "changes in the code below. Try a slider such as 'Simulation duration "
+        "(hours)' or 'Minimum transition probability', a dropdown such as "
+        "'Direction' or 'Transition time statistic', and a checkbox such as "
+        "'Show transition probabilities' or 'Show queue and resource occupancy'. "
+        "How does each control change the code? Look for numbers, quoted text "
+        "and True/False values. Which controls change the simulation parameters, "
+        "and which change how the DFG is displayed? Does enabling occupancy "
+        "just change an argument, or add more code as well?"
+    )
     graph_parameters = dict(
         direction=direction,
         return_image=False,

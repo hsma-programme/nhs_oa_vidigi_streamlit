@@ -5,6 +5,57 @@ from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from model import Param, Model  # , Trial
 
+
+def reset_animation_settings():
+    """Restore only Exercise 2 widgets using their declared defaults."""
+    for key in (
+        "entity_icon_set_input",
+        "resource_icon_input",
+        "timeline_format_input",
+        "playback_speed_input",
+        "time_interval_input",
+        "gap_between_entities_input",
+        "gap_between_queue_rows_input",
+        "gap_between_resources_input",
+        "entity_icon_size_input",
+        "wrap_queues_input",
+        "step_snapshot_max_input",
+        "step_snapshot_limit_gauges_input",
+        "iat_input",
+        "num_recep_input",
+        "num_nurses_input",
+        "num_specialists_input",
+        "animation_duration_hours",
+        "animation_warm_up",
+        "layout_grid_input",
+        "arrival_x_input",
+        "arrival_y_input",
+        "arrival_label_input",
+        "receptionist_wait_x_input",
+        "receptionist_wait_y_input",
+        "receptionist_label_input",
+        "receptionist_seen_x_input",
+        "receptionist_seen_y_input",
+        "receptionist_seen_input",
+        "nurse_wait_x_input",
+        "nurse_wait_y_input",
+        "nurse_wait_label_input",
+        "nurse_seen_x_input",
+        "nurse_seen_y_input",
+        "nurse_seen_label_input",
+        "specialist_wait_x_input",
+        "specialist_wait_y_input",
+        "specialist_wait_label_input",
+        "specialist_seen_x_input",
+        "specialist_seen_y_input",
+        "specialist_seen_label_input",
+        "depart_x_input",
+        "depart_y_input",
+        "depart_label_input",
+    ):
+        st.session_state.pop(key, None)
+
+
 ENTITY_ICON_SETS = {
     "Default": None,
     "Walking (all the same)": ["🚶"],
@@ -139,6 +190,13 @@ with col2_intro:
     )
 
 with st.sidebar:
+    st.button(
+        "Reset to defaults",
+        key="animation_reset",
+        on_click=reset_animation_settings,
+        width="stretch",
+        help="Restore all animation, simulation and advanced layout settings for Exercise 2.",
+    )
     st.markdown("**Animation Parameters**")
     entity_icon_set = st.selectbox(
         "Entity icon set",
@@ -298,6 +356,18 @@ with tab_build:
     st.write("""
 Use the controls in the sidebar to choose entity and resource icons and set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
+
+    st.info(
+        "**TASK:** Experiment with the sidebar controls and watch the highlighted "
+        "changes in 'Your code so far' below. Try a slider such as 'Average "
+        "interarrival time (mins)' or 'Entity Icon Size', a dropdown such as "
+        "'Entity icon set' or 'Playback speed', and the 'Use gauges for queue "
+        "overflows' toggle. How does each control change the code? Look for "
+        "numbers, lists of icons and True/False values. Does each control "
+        "update one argument or several, and does it change the simulation "
+        "parameters or the animation parameters? Use 'Reset to defaults' "
+        "when you want to start again."
+    )
 
     advanced = st.container(key="advanced_section")
     with advanced.expander(
@@ -781,11 +851,8 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         ["Core: queue overflows", "Extra: show more patients", "Extra: staffing"]
     )
     tab_overflow.info(
-        "**TASK:** Set 'Average interarrival time (mins)' to 2, each staff count to 1, "
-        "'Simulation duration (hours)' to 2 and 'Animation warm-up (mins)' to 0. "
-        "Set 'Time between snapshots' to 1, 'Wrap queues at' to 10 and "
-        "'Maximum Queue Displayed' to 10. Leave 'Use gauges for queue overflows' "
-        "off and create the animation. Play it through: which queue builds up? "
+        "**TASK:** Click 'Reset to defaults' at the top of the sidebar, then "
+        "create the animation. Play it through: which queue builds up? "
         "Reduce 'Average interarrival time (mins)' to 1 and rebuild, keeping the other "
         "settings the same. Patients now arrive more frequently: how do the queues change? "
         "What does '+ x more' tell you about patients who are not shown individually? "
