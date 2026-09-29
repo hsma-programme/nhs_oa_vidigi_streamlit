@@ -228,6 +228,9 @@ with st.sidebar:
         help="Keep the seed fixed to compare settings; change it for a new sample.",
     )
 
+dfg_status = st.status("**Updating DFG — please wait…**", expanded=True)
+dfg_status.write("Applying your current sidebar settings.")
+
 tab_build, tab_run = st.tabs(["Build your DFG", "View the DFG"])
 with tab_build:
     st.write(
@@ -325,21 +328,31 @@ with tab_run:
         "these with the number of patients being served, then try adding a "
         "nurse or specialist. How do the queues and resource use change? "
         "These labels describe patients present at a time, rather than the "
-        "total number who visited a step."
+        "total number who visited a step. Consider whether you find it easier "
+        "to interpret the impact from this or from the animation."
     )
-    with st.spinner("Building the directly-follows graph..."):
+    with dfg_status:
+        st.write("Preparing the simulation results…")
         event_log = simulation_log(parameters, random_seed)
         log = add_sim_timestamp(event_log, time_unit="minutes")
+        if show_occupancy:
+            st.write("Calculating queue and resource occupancy…")
         occupancy_stats = (
             occupancy_summary(event_log, occupancy_interval, parameters["sim_duration"])
             if show_occupancy
             else None
         )
+        st.write("Rebuilding the activities and transitions…")
         nodes, edges = discover_dfg(
             log, time_unit=time_unit, occupancy_stats=occupancy_stats
         )
         # vidigi wraps labels in-place; preserve the original discovery tables.
         graph = dfg_to_graphviz(nodes.copy(), edges.copy(), **graph_parameters)
+        dfg_status.update(
+            label="**DFG updated with your current settings**",
+            state="complete",
+            expanded=False,
+        )
     visible_edges = edges[
         (edges["frequency"] >= min_frequency)
         & (edges["probability"] >= min_probability)
