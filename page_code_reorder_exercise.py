@@ -142,10 +142,10 @@ setup_tab, pathway_tab, log_tab = st.tabs(
 with setup_tab:
     st.subheader("Add a logger, replace the resource, and connect them up")
     st.write(
+        "We're going to create an animation that shows both queues and resource use.\n\n"
         "We have our original SimPy resource, and need to prep it for vidigi's logging. But first, we need to add the logger itself!"
         "\n\nAnswer and check each question to reveal the code ordering exercise."
     )
-    st.code("self.nurse = simpy.Resource(self.env, capacity=self.param.num_nurses)")
     imports = checked_question(
         lambda: st.multiselect(
             "Which new imports do you need? Select one or more options from the list. *Remember - for now we're just going to be adding logs to a single model run, not our whole trial.*",
@@ -168,6 +168,10 @@ with setup_tab:
         "imports",
         remember_success=True,
     )
+
+    st.write("Here's our current code for creating our nurse resource.")
+    st.code("self.nurse = simpy.Resource(self.env, capacity=self.param.num_nurses)")
+
     cls = checked_question(
         lambda: choice(
             "What do we need to swap in in place of our existing simpy.Resource class?",
@@ -258,7 +262,11 @@ with setup_tab:
 with pathway_tab:
     st.subheader("Keep, replace and insert")
     st.write(
-        "Assume the nurse store is connected to the logger. The `def attend_clinic` line is fixed at the top of the patient pathway. Reorder the existing code, replace the original nurse request, and weave in the logging statements. Drag any lines you no longer need back to Available snippets. Indentation is supplied on each card."
+        "Now let's have a look at what the code for our `attend_clinic()` method should be with vidigi logging plumbed in."
+        "Assume the nurse store is already connected to the logger, as we did in the previous exercise - so we're going to be using the automated resource use logging this enables."
+        "\n\n<b>Reorder the existing code, replace the original nurse request, and weave in the logging statements.<\b> "
+        "\n\nThe `def attend_clinic` line is fixed at the top of the patient pathway. "
+        "\n\n<b>Drag any lines you no longer need back to Available snippets. <\b> Indentation is supplied on each card - use this to help you!"
     )
     snippets = {
         "startq": "    start_q_nurse = self.env.now",
@@ -411,7 +419,10 @@ with pathway_tab:
 with log_tab:
     st.subheader("From event log to animation snapshots")
     st.write(
-        "Patient 7 arrives at minute 2 and immediately joins the nurse queue. The nurse becomes available at minute 5. Treatment lasts 4 minutes, then the patient leaves. The model runs beyond minute 9."
+        "Patient 7 arrives at minute 2 and immediately joins the nurse queue. "
+        "\n\nThe nurse becomes available at minute 5. "
+        "\n\nTreatment lasts 4 minutes, then the patient leaves. "
+        "\n\nThe model runs beyond minute 9."
     )
     st.markdown(
         """| entity_id | event | time | resource_id |
@@ -426,7 +437,9 @@ with log_tab:
         "Illustrative excerpt assuming this nurse has resource ID 1. Waiting lasts 3 minutes; treatment lasts 4."
     )
     st.write(
-        "At each snapshot, vidigi uses the latest event each patient has reached to decide where to show them. Patients who have departed no longer appear."
+        "At each snapshot, vidigi uses the <b>latest event</b> each patient has reached to decide where to show them. Patients who have departed no longer appear."
+        "\n\nBefore it can make an animation, vidigi must convert from the event log above to a table that shows the patient's position at the specifed time intervals."
+        "\n\nSelect a 'snapshot' time from the dropdown, then choose where the patients will appear."
     )
     snapshot_time = st.selectbox(
         "Choose a snapshot time (minutes)",
@@ -464,7 +477,7 @@ with log_tab:
             )
             st.info(explanations[snapshot_time])
     st.info(
-        "In Exercise 2, try changing the time between snapshots. Wider gaps create fewer frames and can skip over short-lived states. The layout event names must match the log."
+        "In Exercise 2, try changing the time between snapshots. Wider gaps create fewer frames and can skip over short-lived states."
     )
     st.info(
         "All done? Click on 'Exercise 2' in the navigation menu to build and run your own animation."
