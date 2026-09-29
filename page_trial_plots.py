@@ -70,7 +70,24 @@ def run_trial(parameters, first_seed):
 
 @st.cache_data(max_entries=16, show_spinner=False)
 def queue_plot(parameters, first_seed, options):
-    return run_trial(parameters, first_seed).plot_queue_size(**options)
+    fig = run_trial(parameters, first_seed).plot_queue_size(
+        **options, facet_row_spacing=0.1
+    )
+    # Match each vertical facet label to its subplot before moving it above.
+    axes = [fig.layout[name] for name in fig.layout if name.startswith("yaxis")]
+    for title in fig.layout.annotations:
+        if title.textangle == 90:
+            axis = min(axes, key=lambda axis: abs(sum(axis.domain) / 2 - title.y))
+            x_axis = fig.layout["xaxis" + axis.anchor[1:]]
+            title.update(
+                x=sum(x_axis.domain) / 2,
+                y=axis.domain[1],
+                textangle=0,
+                xanchor="center",
+                yanchor="bottom",
+                yshift=6,
+            )
+    return fig
 
 
 @st.cache_data(max_entries=16, show_spinner=False)
@@ -168,7 +185,7 @@ st.html("""<style>
 
 st.title("Trial plots playground")
 st.write(
-    "Explore variation across repeated simulation runs. Start with the core queue-size activity, then choose one other plot if time allows. Change the simulation settings in the sidebar; **plots and code update automatically.**"
+    "Explore variation across repeated simulation runs. Start with the core queue-size activity, then choose one other plot if time allows. Change the simulation settings in the sidebar; **plots and code update automatically. Please wait a few seconds after changing a parameter.**"
 )
 
 with st.sidebar:
@@ -415,7 +432,7 @@ def render_queue_tab():
             plot_status.info("**Updating queue size plot - please wait...**")
             fig = queue_plot(parameters, first_seed, options)
             st.plotly_chart(fig, width="stretch", key="trial_queue_plot")
-            plot_status.success("**Plot updated with your current settings**")
+            plot_status.empty()
 
 
 @st.fragment
@@ -522,7 +539,7 @@ def render_duration_tab():
             )
         else:
             st.plotly_chart(fig, width="stretch", key="trial_duration_plot")
-            plot_status.success("**Plot updated with your current settings**")
+            plot_status.empty()
 
 
 @st.fragment
@@ -606,7 +623,7 @@ def render_resource_tab():
             parameters, first_seed, "plot_resource_utilisation", options
         )
         st.plotly_chart(fig, width="stretch", key="trial_resource_plot")
-        plot_status.success("**Plot updated with your current settings**")
+        plot_status.empty()
 
 
 @st.fragment
@@ -683,8 +700,17 @@ def render_resource_time_tab():
         fig = additional_plot(
             parameters, first_seed, "plot_resource_utilisation_over_time", options
         )
+        # Keep the x-axis title only on the bottom subplot.
+        x_axes = [fig.layout[name] for name in fig.layout if name.startswith("xaxis")]
+        bottom = min(
+            x_axes,
+            key=lambda axis: fig.layout["yaxis" + axis.anchor[1:]].domain[0],
+        )
+        for axis in x_axes:
+            if axis is not bottom:
+                axis.title.text = None
         st.plotly_chart(fig, width="stretch", key="trial_resource_time_plot")
-        plot_status.success("**Plot updated with your current settings**")
+        plot_status.empty()
 
 
 @st.fragment
@@ -785,7 +811,7 @@ def render_arrival_tab():
             )
         else:
             st.plotly_chart(fig, width="stretch", key="trial_arrival_plot")
-            plot_status.success("**Plot updated with your current settings**")
+            plot_status.empty()
 
 
 queue_tab, duration_tab, resource_tab, resource_time_tab, arrival_tab = st.tabs(

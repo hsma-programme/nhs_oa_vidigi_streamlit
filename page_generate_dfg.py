@@ -358,7 +358,8 @@ with tab_run:
         "Then set 'Simulation duration' to 2 hours and watch the graph refresh, "
         "keeping the other settings at their defaults. "
         "Find the arrow leading to the specialist: how does its observed "
-        "probability compare with 0.3? Increase the duration to 12 hours "
+        "probability compare with 0.3, the probability we set of someone needing "
+        "to see a specialist? Increase the duration to 12 hours "
         "without changing the seed and compare again. Think about why the "
         "observed probability can differ from the setting in a single run."
     )
