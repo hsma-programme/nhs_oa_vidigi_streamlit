@@ -233,6 +233,12 @@ with st.sidebar:
         help="Best as a multiple of 'Wrap queues at!'",
     )
 
+    step_snapshot_limit_gauges = st.toggle(
+        "Use gauges for queue overflows",
+        key="step_snapshot_limit_gauges_input",
+        help="On: show gauges when queues exceed the maximum displayed. Off: show '+ x more' text. Run the animation to see the change.",
+    )
+
     st.divider()
 
     st.markdown("**Simulation Parameters**")
@@ -606,6 +612,7 @@ fig = animate_activity_log(
     custom_resource_icon={custom_resource_icon!r},
     gap_between_entities={gap_between_entities_slider},
     wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
+    step_snapshot_limit_gauges={step_snapshot_limit_gauges},
     gap_between_resources={gap_between_resources_slider},
     gap_between_queue_rows={gap_between_queue_rows_slider},
 )
@@ -709,6 +716,7 @@ class Animation:
             scenario=self.params,
             gap_between_entities=gap_between_entities_slider,
             step_snapshot_max=maximum_queue,
+            step_snapshot_limit_gauges=step_snapshot_limit_gauges,
             gap_between_resources=gap_between_resources_slider,
             plotly_height=600,
             entity_icon_size=entity_icon_size_slider,
