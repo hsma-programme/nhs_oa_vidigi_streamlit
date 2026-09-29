@@ -179,6 +179,7 @@ with st.sidebar:
         width="stretch",
         help="Restore the simulation parameters and all plot tabs to their defaults for Exercise 4 only.",
     )
+    st.caption("Please press once and wait 5 seconds.")
     st.markdown("**Simulation parameters**")
     parameters = dict(
         mean_patient_inter=st.slider(

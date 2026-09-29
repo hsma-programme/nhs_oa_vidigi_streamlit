@@ -9,33 +9,34 @@ from model import Model, Param
 
 
 def reset_dfg_settings():
-    """Restore only Exercise 3 widgets using their declared defaults."""
-    for key in (
-        "dfg_direction",
-        "dfg_time_metric",
-        "dfg_time_unit",
-        "dfg_min_frequency",
-        "dfg_min_probability",
-        "dfg_node_counts",
-        "dfg_edge_counts",
-        "dfg_probabilities",
-        "dfg_show_metric",
-        "dfg_show_occupancy",
-        "dfg_occupancy_interval",
-        "dfg_dashed",
-        "dfg_dash_threshold",
-        "dfg_wrap",
-        "dfg_wrap_at",
-        "dfg_iat",
-        "dfg_receptionists",
-        "dfg_nurses",
-        "dfg_specialists",
-        "dfg_specialist_prob",
-        "dfg_duration_hours",
-        "dfg_seed",
-        "dfg_zoom",
-    ):
-        st.session_state.pop(key, None)
+    """Explicitly restore widget values, including in stlite."""
+    st.session_state.update(
+        {
+            "dfg_direction": 'LR',
+            "dfg_time_metric": 'mean',
+            "dfg_time_unit": 'minutes',
+            "dfg_min_frequency": 0,
+            "dfg_min_probability": 0.0,
+            "dfg_node_counts": True,
+            "dfg_edge_counts": True,
+            "dfg_probabilities": True,
+            "dfg_show_metric": True,
+            "dfg_show_occupancy": False,
+            "dfg_occupancy_interval": 1,
+            "dfg_dashed": True,
+            "dfg_dash_threshold": 0.1,
+            "dfg_wrap": True,
+            "dfg_wrap_at": 15,
+            "dfg_iat": 2.0,
+            "dfg_receptionists": 1,
+            "dfg_nurses": 1,
+            "dfg_specialists": 1,
+            "dfg_specialist_prob": 0.3,
+            "dfg_duration_hours": 4,
+            "dfg_seed": 4,
+            "dfg_zoom": 100,
+        }
+    )
     st.toast("Defaults restored. Updating the DFG...")
 
 
@@ -93,6 +94,7 @@ with st.sidebar:
         width="stretch",
         help="Restore all simulation, DFG and graph zoom settings for Exercise 3.",
     )
+    st.caption("Please press once and wait 5 seconds.")
     st.markdown("**DFG parameters**")
     direction = st.selectbox(
         "Direction",
