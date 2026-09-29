@@ -228,8 +228,8 @@ with st.sidebar:
         help="Keep the seed fixed to compare settings; change it for a new sample.",
     )
 
-dfg_status = st.status("**Updating DFG — please wait…**", expanded=True)
-dfg_status.write("Applying your current sidebar settings.")
+dfg_status = st.empty()
+dfg_status.info("**Updating DFG - please wait...**")
 
 tab_build, tab_run = st.tabs(["Build your DFG", "View the DFG"])
 with tab_build:
@@ -331,28 +331,28 @@ with tab_run:
         "total number who visited a step. Consider whether you find it easier "
         "to interpret the impact from this or from the animation."
     )
-    with dfg_status:
-        st.write("Preparing the simulation results…")
+    try:
+        dfg_status.info("**Updating DFG - preparing simulation results...**")
         event_log = simulation_log(parameters, random_seed)
         log = add_sim_timestamp(event_log, time_unit="minutes")
         if show_occupancy:
-            st.write("Calculating queue and resource occupancy…")
+            dfg_status.info("**Updating DFG - calculating queue and resource occupancy...**")
         occupancy_stats = (
             occupancy_summary(event_log, occupancy_interval, parameters["sim_duration"])
             if show_occupancy
             else None
         )
-        st.write("Rebuilding the activities and transitions…")
+        dfg_status.info("**Updating DFG - rebuilding activities and transitions...**")
         nodes, edges = discover_dfg(
             log, time_unit=time_unit, occupancy_stats=occupancy_stats
         )
         # vidigi wraps labels in-place; preserve the original discovery tables.
         graph = dfg_to_graphviz(nodes.copy(), edges.copy(), **graph_parameters)
-        dfg_status.update(
-            label="**DFG updated with your current settings**",
-            state="complete",
-            expanded=False,
-        )
+    except Exception:
+        dfg_status.error("**Unable to update DFG for these settings**")
+        raise
+    else:
+        dfg_status.success("**DFG updated with your current settings**")
     visible_edges = edges[
         (edges["frequency"] >= min_frequency)
         & (edges["probability"] >= min_probability)
