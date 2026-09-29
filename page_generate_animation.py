@@ -781,7 +781,7 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         ["Core: queue overflows", "Extra: show more patients", "Extra: staffing"]
     )
     tab_overflow.info(
-        "Set 'Average interarrival time (mins)' to 2, each staff count to 1, "
+        "**TASK:** Set 'Average interarrival time (mins)' to 2, each staff count to 1, "
         "'Simulation duration (hours)' to 2 and 'Animation warm-up (mins)' to 0. "
         "Set 'Time between snapshots' to 1, 'Wrap queues at' to 10 and "
         "'Maximum Queue Displayed' to 10. Leave 'Use gauges for queue overflows' "
@@ -795,7 +795,7 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         "step_snapshot_limit_gauges arguments that changed."
     )
     tab_layout.info(
-        "Keep 'Average interarrival time (mins)' at 1 from the core activity and leave "
+        "**TASK:** Keep 'Average interarrival time (mins)' at 1 from the core activity and leave "
         "the other simulation settings fixed. Can you show more patients individually "
         "while keeping the animation readable? Try reducing 'Entity Icon Size' "
         "from 20 to 10, increasing 'Wrap queues at' from 10 to 20 and increasing "
@@ -807,7 +807,7 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         "wrap_queues_at and step_snapshot_max."
     )
     tab_staffing.info(
-        "Return 'Time between snapshots' to 1. With an average interarrival time of 2 minutes "
+        "**TASK:** Return 'Time between snapshots' to 1. With an average interarrival time of 2 minutes "
         "and one of each staff member, watch where patients wait. Increase "
         "'Number of Nurses' to 2 and rebuild, keeping the other settings fixed. "
         "How does the nurse queue change, and what happens further along the pathway? "

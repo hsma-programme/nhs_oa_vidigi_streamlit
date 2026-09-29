@@ -344,7 +344,7 @@ PAIRS = {
 @st.fragment
 def render_queue_tab():
     st.info(
-        "**Core activity: compare queue sizes.** Keep the 8-hour simulation and "
+        "**TASK:** Compare queue sizes. Keep the 8-hour simulation and "
         'random seed fixed. Turn off "Show individual runs" to focus on the mean '
         "across replications. Compare the nurse and specialist queues, then increase "
         '"Number of nurses" from 1 to 2 in the sidebar. How does the nurse queue '
@@ -418,7 +418,7 @@ def render_queue_tab():
 @st.fragment
 def render_duration_tab():
     st.info(
-        '**Activity: investigate waiting times.** Start with "Waiting for nurse" '
+        '**TASK:** Investigate waiting times. Start with "Waiting for nurse" '
         "and compare the median, spread and long waits across runs. Keep the "
         "random seed fixed while increasing the number of nurses in the "
         "sidebar. How do the distribution and its outliers change? Try the "
@@ -522,7 +522,7 @@ def render_duration_tab():
 @st.fragment
 def render_resource_tab():
     st.info(
-        '**Activity: find the busiest resource.** With "Utilisation" selected, '
+        '**TASK:** Find the busiest resource. With "Utilisation" selected, '
         "compare the steps and their results across runs. Which resource is "
         "busy for the largest share of its available time? Increase its "
         "capacity by one in the sidebar and see how utilisation changes. "
@@ -604,7 +604,7 @@ def render_resource_tab():
 @st.fragment
 def render_resource_time_tab():
     st.info(
-        '**Activity: spot periods of pressure.** Turn off "Show individual '
+        '**TASK:** Spot periods of pressure. Turn off "Show individual '
         'runs" and use "Show proportion of capacity" to compare the mean '
         "resource use over time. When is each step closest to full capacity? "
         "Increase the number of resources at the busiest step, keeping the "
@@ -680,7 +680,7 @@ def render_resource_time_tab():
 @st.fragment
 def render_arrival_tab():
     st.info(
-        "**Activity: see whether arrival time affects waiting.** Select "
+        "**TASK:** See whether arrival time affects waiting. Select "
         '"Waiting for nurse" and add a trend line using a window of 10 '
         "patients. Do patients arriving later tend to wait longer? Keep the "
         "random seed fixed and increase the number of nurses. Compare the "
