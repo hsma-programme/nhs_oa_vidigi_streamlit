@@ -773,4 +773,46 @@ with tab_run:
 Finished tweaking the settings? Click the button to see how the changes you've made affect the final animation. You can rerun this as many times as you like!
 """)
 
+    st.write(
+        "Start with the core activity. The layout and staffing activities are optional if you have time. "
+        "Click the button below after each change to rebuild the animation."
+    )
+    tab_overflow, tab_layout, tab_staffing = st.tabs(
+        ["Core: queue overflows", "Extra: show more patients", "Extra: staffing"]
+    )
+    tab_overflow.info(
+        "Set 'Interarrival Time (mins)' to 2, each staff count to 1, "
+        "'Simulation duration (hours)' to 2 and 'Animation warm-up (mins)' to 0. "
+        "Set 'Time between snapshots' to 1, 'Wrap queues at' to 10 and "
+        "'Maximum Queue Displayed' to 10. Leave 'Use gauges for queue overflows' "
+        "off and create the animation. Play it through: which queue builds up? "
+        "Reduce 'Interarrival Time (mins)' to 1 and rebuild, keeping the other "
+        "settings the same. Patients now arrive more frequently: how do the queues change? "
+        "What does '+ x more' tell you about patients who are not shown individually? "
+        "Keeping the interarrival time at 1, turn on the gauges and rebuild. "
+        "Which overflow display makes the busier queues easier to interpret? "
+        "In 'Build your animation', find the mean_patient_inter and "
+        "step_snapshot_limit_gauges arguments that changed."
+    )
+    tab_layout.info(
+        "Keep 'Interarrival Time (mins)' at 1 from the core activity and leave "
+        "the other simulation settings fixed. Can you show more patients individually "
+        "while keeping the animation readable? Try reducing 'Entity Icon Size' "
+        "from 20 to 10, increasing 'Wrap queues at' from 10 to 20 and increasing "
+        "'Maximum Queue Displayed' from 10 to 40. Rebuild after each change "
+        "to see its effect. Experiment with these three controls: how many patients "
+        "can you display without queues overlapping other parts of the layout? "
+        "Does showing more icons change the actual queue length, or just how it "
+        "is displayed? In the first tab's code, find entity_icon_size, "
+        "wrap_queues_at and step_snapshot_max."
+    )
+    tab_staffing.info(
+        "Return 'Time between snapshots' to 1. With an interarrival time of 2 minutes "
+        "and one of each staff member, watch where patients wait. Increase "
+        "'Number of Nurses' to 2 and rebuild, keeping the other settings fixed. "
+        "How does the nurse queue change, and what happens further along the pathway? "
+        "The random seed stays fixed for these runs. What can this single animation "
+        "suggest about staffing, and what would you want to check across multiple runs?"
+    )
+
     render_anim()
