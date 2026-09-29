@@ -301,17 +301,18 @@ with tab_run:
         ["Core: observed probability", "Extra: random seeds", "Extra: occupancy"]
     )
     tab_ex_1_dfg.info(
-        "Keep the random "
+        "**EXERCISE:** Keep the random "
         "seed fixed and make sure 'Probability of needing a specialist' is set to 0.3 "
         "and 'Show transition probabilities' is enabled. Set 'Simulation duration' "
         "to 2 hours in the sidebar and watch the graph refresh. "
         "Find the arrow leading to the specialist: how does its observed "
-        "probability compare with 0.3? Increase the duration to 4 hours "
+        "probability compare with 0.3? Increase the duration to 12 hours "
         "without changing the seed and compare again. Think about why the "
         "observed probability can differ from the setting in a single run."
     )
     tab_ex_2_dfg.info(
-        "Keep the simulation duration at 4 hours and change the random seed, "
+        "**EXERCISE:** Change 'Simulation duration' back to 4 hours before starting. "
+        "Then change the random seed, "
         "keeping the other settings the same. What "
         "happens to the number of patients at each step and the transition "
         "probabilities for the paths leaving that step? Try a few seeds and "
@@ -319,7 +320,7 @@ with tab_run:
         "counts' and 'Show transition probabilities' are enabled to see these values."
     )
     tab_ex_3_dfg.info(
-        "Try enabling 'Show queue and resource occupancy' in the sidebar. "
+        "**EXERCISE:** Try enabling 'Show queue and resource occupancy' in the sidebar. "
         "Which steps have the largest average and maximum queues? Compare "
         "these with the number of patients being served, then try adding a "
         "nurse or specialist. How do the queues and resource use change? "

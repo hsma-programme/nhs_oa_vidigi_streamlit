@@ -243,13 +243,13 @@ with st.sidebar:
 
     st.markdown("**Simulation Parameters**")
     iat_slider = st.slider(
-        "Interarrival Time (mins)",
+        "Average interarrival time (mins)",
         value=2.0,
         min_value=0.1,
         max_value=30.0,
         key="iat_input",
         step=0.1,
-        help="Remember that a lower inter-arrival time means patients arrive more frequently and there will be more patients per day.",
+        help="The time between arrivals varies. A lower average interarrival time means patients arrive more frequently on average.",
     )
     num_recep_slider = st.slider(
         "Number of Receptionists",
@@ -781,21 +781,21 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         ["Core: queue overflows", "Extra: show more patients", "Extra: staffing"]
     )
     tab_overflow.info(
-        "Set 'Interarrival Time (mins)' to 2, each staff count to 1, "
+        "Set 'Average interarrival time (mins)' to 2, each staff count to 1, "
         "'Simulation duration (hours)' to 2 and 'Animation warm-up (mins)' to 0. "
         "Set 'Time between snapshots' to 1, 'Wrap queues at' to 10 and "
         "'Maximum Queue Displayed' to 10. Leave 'Use gauges for queue overflows' "
         "off and create the animation. Play it through: which queue builds up? "
-        "Reduce 'Interarrival Time (mins)' to 1 and rebuild, keeping the other "
+        "Reduce 'Average interarrival time (mins)' to 1 and rebuild, keeping the other "
         "settings the same. Patients now arrive more frequently: how do the queues change? "
         "What does '+ x more' tell you about patients who are not shown individually? "
-        "Keeping the interarrival time at 1, turn on the gauges and rebuild. "
+        "Keeping the average interarrival time at 1, turn on the gauges and rebuild. "
         "Which overflow display makes the busier queues easier to interpret? "
         "In 'Build your animation', find the mean_patient_inter and "
         "step_snapshot_limit_gauges arguments that changed."
     )
     tab_layout.info(
-        "Keep 'Interarrival Time (mins)' at 1 from the core activity and leave "
+        "Keep 'Average interarrival time (mins)' at 1 from the core activity and leave "
         "the other simulation settings fixed. Can you show more patients individually "
         "while keeping the animation readable? Try reducing 'Entity Icon Size' "
         "from 20 to 10, increasing 'Wrap queues at' from 10 to 20 and increasing "
@@ -807,7 +807,7 @@ Finished tweaking the settings? Click the button to see how the changes you've m
         "wrap_queues_at and step_snapshot_max."
     )
     tab_staffing.info(
-        "Return 'Time between snapshots' to 1. With an interarrival time of 2 minutes "
+        "Return 'Time between snapshots' to 1. With an average interarrival time of 2 minutes "
         "and one of each staff member, watch where patients wait. Increase "
         "'Number of Nurses' to 2 and rebuild, keeping the other settings fixed. "
         "How does the nurse queue change, and what happens further along the pathway? "
