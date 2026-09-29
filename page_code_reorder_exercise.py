@@ -450,7 +450,14 @@ with log_tab:
     )
     location = choice(
         "Where will patient 7 appear?",
-        ["Waiting for a nurse", "With the nurse", "No longer in the animation"],
+        [
+            "Not yet arrived",
+            "At arrival, before joining the nurse queue",
+            "Waiting for a nurse",
+            "With the nurse",
+            "Treatment finished, waiting to leave",
+            "No longer in the animation",
+        ],
         "snapshot_location",
     )
     if st.button("Check answer", key="ex1_check_log", type="primary"):
