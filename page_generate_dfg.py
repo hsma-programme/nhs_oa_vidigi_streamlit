@@ -88,13 +88,12 @@ description.write(
 
 with st.sidebar:
     st.button(
-        "Reset to defaults",
+        "Reset to defaults\n*Please press once and wait a few seconds.*",
         key="dfg_reset",
         on_click=reset_dfg_settings,
         width="stretch",
         help="Restore all simulation, DFG and graph zoom settings for Exercise 3.",
     )
-    st.caption("Please press once and wait 5 seconds.")
     st.markdown("**DFG parameters**")
     direction = st.selectbox(
         "Direction",

@@ -193,13 +193,12 @@ with col2_intro:
 
 with st.sidebar:
     st.button(
-        "Reset to defaults",
+        "Reset to defaults\n*Please press once and wait a few seconds.*",
         key="animation_reset",
         on_click=reset_animation_settings,
         width="stretch",
         help="Restore all animation, simulation and advanced layout settings for Exercise 2.",
     )
-    st.caption("Please press once and wait 5 seconds.")
     st.markdown("**Animation Parameters**")
     entity_icon_set = st.selectbox(
         "Entity icon set",

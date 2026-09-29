@@ -173,13 +173,12 @@ st.write(
 
 with st.sidebar:
     st.button(
-        "Reset parameters to defaults",
+        "Reset parameters to defaults\n*Please press once and wait a few seconds.*",
         key="trial_reset",
         on_click=reset_parameters,
         width="stretch",
         help="Restore the simulation parameters and all plot tabs to their defaults for Exercise 4 only.",
     )
-    st.caption("Please press once and wait 5 seconds.")
     st.markdown("**Simulation parameters**")
     parameters = dict(
         mean_patient_inter=st.slider(
